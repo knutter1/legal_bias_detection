@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urteilsannotator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.css" rel="stylesheet">
+    <style>
+        /* Grundfarben: Off-White-Hintergrund, Akzentfarbe und neutrale Töne */
+        body {
+            background-color: #f8f9fa; /* leicht off-white statt reinem Weiß */
+        }
+        .container-fluid {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .scrollable {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .case-list {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+            width: 70%;
+            margin: 0 auto;
+        }
+        .case-item {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            white-space: nowrap;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        .case-item.active {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+        /* Hover-Effekt für Case-Items */
+        .case-item:hover {
+            background-color: #f1f3f5;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #e9ecef;
+        }
+        .resizable {
+            resize: horizontal;
+            overflow: auto;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+        .auto-height {
+            height: auto;
+            min-height: 100px;
+            resize: none;
+            overflow: hidden;
+        }
+        .gutter {
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
+        }
+        .gutter.gutter-horizontal {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+            cursor: col-resize;
+        }
+        /* Tooltip-Stil für die Accordion-Buttons */
+        [data-bs-toggle="collapse"][title] {
+            position: relative;
+        }
+        [data-bs-toggle="collapse"][title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -30px;
+            left: 0;
+            background: #333;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+        /* hide summary when collapsed */
+        .accordion-button.collapsed small {
+            display: none;
+        }
+        /* Neue Styles für das LLM-Ergebnis */
+        .bias-result {
+            padding: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            background-color: transparent;
+        }
+        .bias-field {
+            padding: 0.5rem 0;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 0;
+        }
+        /* Neues Layout für das mittlere Panel: Flex-Spalte, sodass der Shortcuts-Bereich unten ausgerichtet ist */
+        .middle-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .content-upper {
+            /* Enthält die Bias-Ergebnisse, Annotation und Navigation */
+        }
+        .shortcuts {
+            margin-top: auto;
+        }
+        #summary-content, .bias-field {
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid vh-100 d-flex flex-column p-0">
+
+        <div class="d-flex gap-3 p-3 border-bottom align-items-center">
+            <div class="d-flex flex-column ms-3" style="font-size: 0.8rem;">
+                <div class="mb-1">Zeige Bias-Fälle von:</div>
+                <div class="d-flex flex-column gap-0">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="llama-checkbox" value="4" {% if run_ids is defined and (4 in run_ids) %}checked{% endif %}>
+                        <label class="form-check-label" for="llama-checkbox">
+                            llama3.3 ({{ all_biases | selectattr('run_id', 'equalto', 4) | list | length }})
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="deepseek-checkbox" value="5" {% if run_ids is defined and (5 in run_ids) %}checked{% endif %}>
+                        <label class="form-check-label" for="deepseek-checkbox">
+                            deepseek-r1 ({{ all_biases | selectattr('run_id', 'equalto', 5) | list | length }})
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="case-list">
+                {% for _bias in all_biases %}
+                    <a href="{{ url_for('bias_route', bias_id=_bias.id, run_ids=",".join(run_ids|map("string"))) }}" id="case-item-{{_bias.id}}" class="case-item {% if bias and bias.id == _bias.id %}active{% endif %}">
+                        {{ _bias.id }}
+                    </a>
+                {% endfor %}
+            </div>
+
+            <select class="form-select" id="annotator-select" style="width: 15%;">
+                <option>Kilian Lüders</option>
+                <option>Sabine Wehnert</option>
+                <option>Tom Herzberg</option>
+            </select>
+        </div>
+
+        <div class="d-flex flex-grow-1" id="split-container" style="height: 100vh;">
+            <div class="resizable scrollable p-3 border-end" style="flex: 1; min-width: 0;">
+                <strong>Fall {{ bias.id }}</strong>
+                <div id="summary-content"></div>
+                <a href="#" id="original-link">Originaltext</a>
+            </div>
+
+            <div class="resizable scrollable p-3 border-end middle-panel" style="flex: 1; min-width: 0;">
+                <div class="content-upper">
+                    <div class="mb-3">
+                        <div id="bias-content" class="bias-result"></div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="annotation-comment" class="mb-0">Kommentar des Annotators</label>
+                            <button id="nicht-ueberpruefbar-btn" type="button" class="btn btn-outline-danger rounded">
+                                Nicht überprüfbar
+                            </button>
+                        </div>
+                        <textarea class="form-control auto-height" id="annotation-comment"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn btn-outline-secondary" id="prev-case">← Vorheriges</button>
+                        <button class="btn btn-primary" id="save-annotation">Speichern</button>
+                        <button class="btn btn-outline-secondary" id="next-case">Nächstes →</button>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-outline-secondary" id="next-unannotated" title="Springe zum nächsten unbearbeiteten Fall">Nächster unbearbeiteter</button>
+                    </div>
+                </div>
+                <div class="shortcuts d-flex justify-content-between mt-auto">
+                    Shortcuts: ←, → zum Fälle skippen<br>
+                    Enter zum Speichern der Annotation<br>
+                    C um in Kommentarblock zu springen<br>
+                    0-9 um Bias-Kategorie auszuwählen (0 = Kein Bias)<br>
+                    , um "Nicht überprüfbar" auszulösen
+                </div>
+            </div>
+
+            <div class="resizable scrollable p-3" style="flex: 1; min-width: 0;">
+                <div class="accordion" id="guidelines">
+                    {% for g in guidelines %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-{{ loop.index0 }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guideline-{{ loop.index0 }}" aria-expanded="{% if bias.bias_type_id == loop.index0 %}true{% else %}false{% endif %}" aria-controls="guideline-{{ loop.index0 }}">
+                                <input type="radio" name="bias-type" value="{{ loop.index0 }}" {% if bias.bias_type_id == loop.index0 %}checked{% endif %}>
+                                <span class="ms-2">
+                                    <strong>
+                                        {% if loop.index0 < 10 %}
+                                            {{ loop.index0 }}
+                                        {% else %}
+                                            ,
+                                        {% endif %}
+                                    </strong>
+                                    {% if bias.bias_type_id == loop.index0 %}🤖 {% endif %}
+                                    {{ bias_types[loop.index0] }}<br>
+                                </span>
+                            </button>
+                        </h2>
+                        <div id="guideline-{{ loop.index0 }}" class="accordion-collapse collapse {% if bias.bias_type_id == loop.index0 %}show{% endif %}" aria-labelledby="heading-{{ loop.index0 }}" data-bs-parent="#guidelines">
+                            <div class="accordion-body" style="white-space: pre-wrap;"><small>{{ g }}</small></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.js"></script>
+    <script>
+        // Replace static biases array with the single bias passed from Flask via Jinja
+        const bias = {{ bias | tojson }};
+
+        // hardcoded cases for Kilian to work on
+        const kilianCases = [13, 24, 25, 29, 33, 36, 41, 48, 59, 73, 77, 113, 119, 125, 162, 170, 230, 242, 244, 245, 246, 406, 453, 454, 455, 464, 466, 467, 468, 501, 502, 503, 531, 565, 566, 577, 592, 618, 643, 645, 649, 651, 656, 685, 687, 855, 856, 862, 863, 879, 893, 921, 926, 946, 955, 962, 980, 1010, 1034, 1044, 1045, 1047, 1062, 1063, 1064, 1077, 1084, 1085, 1086, 1089, 1104, 1237, 1239, 1281, 1296, 1346, 1368, 1420, 1425, 1521];
+
+        // Remove case list and navigation code
+        // # ...existing code removed...
+
+        function initUI() {
+            // Load bias data directly without case navigation
+            loadBias();
+
+            // Remove or adjust any elements related to multiple biases
+            // # ...existing code removed...
+        }
+
+        // Function to load single bias data
+        function loadBias() {
+            // Update the left panel summary by replacing **text** with <strong>text</strong>
+            const summaryElement = document.getElementById('summary-content');
+            summaryElement.innerHTML = bias.summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            document.getElementById('original-link').href = bias.origin_url;
+            document.getElementById('original-link').setAttribute('target', '_blank');
+
+            // Update the middle panel with bias fields
+            const biasDiv = document.getElementById('bias-content');
+            biasDiv.innerHTML = `
+            <div class="bias-field" title="Erkannter Bias"><strong>Erkannter Bias:</strong> ${bias.bias_type_name}</div>
+            <hr class="divider">
+            <div class="bias-field" title="Textpassage"><strong>Textpassage:</strong> ${bias.textpassage}</div>
+            <hr class="divider">
+            <div class="bias-field" title="Begründung"><strong>Begründung:</strong> ${bias.reasoning}</div>
+            `;
+
+            const currentAnnotator = document.getElementById('annotator-select').value;
+
+            // Kilian Lüders only sees his cases
+            if (currentAnnotator === "Kilian Lüders") {
+                onlyShowKiliansCases();
+                console.log("Kilian's cases are being displayed.");
+            }
+
+            // Load annotation if available (adjust as needed)
+            const annotation = bias.annotations.find(a => a.annotator === currentAnnotator);
+
+            if (annotation) {
+                const radioInput = document.querySelector(`input[value="${annotation.bias_type_id.toString()}"]`);
+                if (radioInput) {
+                    radioInput.checked = true;
+                } else {
+                    console.warn("No radio input found for annotation bias_type_id:", annotation.bias_type_id);
+                }
+                document.getElementById('annotation-comment').value = annotation.comment || '';
+            } else {
+                const radioInput = document.querySelector(`input[value="${bias.bias_type_id.toString()}"]`);
+                if (radioInput) {
+                    radioInput.checked = true;
+                } else {
+                    console.warn("No radio input found for bias bias_type_id:", bias.bias_type_id);
+                }
+                document.getElementById('annotation-comment').value = '';
+            }
+
+            // Update guidelines section if necessary
+            // # ...existing code updated accordingly...
+        }
+
+        // Function to only show Kilian's cases
+        function onlyShowKiliansCases() {
+            const caseList = document.querySelector('.case-list');
+            const caseItems = caseList.querySelectorAll('.case-item');
+            caseItems.forEach(item => {
+                if (!kilianCases.includes(parseInt(item.textContent))) {
+                    item.style.display = 'none'; // Hide items not in Kilian's cases
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // restore annotator and case-list scroll position from localStorage if available
+            const storedAnnotator = localStorage.getItem('selectedAnnotator');
+            if (storedAnnotator) {
+                document.getElementById('annotator-select').value = storedAnnotator;
+            }
+            const caseList = document.querySelector('.case-list');
+            const storedScroll = localStorage.getItem('caseListScroll');
+            if (storedScroll) {
+                caseList.scrollLeft = parseInt(storedScroll, 10);
+            }
+
+            // Center the active case in the case-list
+            const activeCase = document.querySelector('.case-item.active');
+            if (activeCase) {
+                const containerWidth = caseList.clientWidth;
+                // Calculate scrollLeft so that activeCase is centered
+                const scrollLeft = activeCase.offsetLeft - (containerWidth / 2) + (activeCase.offsetWidth / 2);
+                caseList.scrollLeft = scrollLeft;
+            }
+
+            initUI();
+
+            // Get the current annotator from the select element.
+            const currentAnnotator = document.getElementById('annotator-select').value;
+            // Convert Jinja variable all_biases into a JS array.
+            const allBiases = {{ all_biases | tojson }};
+
+            // Iterate through each bias.
+            allBiases.forEach(_bias => {
+                // If arr_annotators (an array of annotator names) includes the current annotator...
+                if (_bias.arr_annotators.includes(currentAnnotator)) {
+                    // ...select the corresponding case item by its id.
+                    const caseItem = document.getElementById('case-item-' + _bias.id.toString());
+                    if (caseItem) {
+                        // Add Bootstrap classes to color it green (bg-success) with white text.
+                        caseItem.classList.add('bg-success', 'text-white');
+                    }
+                }
+            });
+
+            // Add change listeners for run_ids checkboxes
+            const llamaCheckbox = document.getElementById('llama-checkbox');
+            const deepseekCheckbox = document.getElementById('deepseek-checkbox');
+
+            function updateRunIds() {
+                let runIds = [];
+                if (llamaCheckbox.checked) runIds.push('4');
+                if (deepseekCheckbox.checked) runIds.push('5');
+                if (!deepseekCheckbox.checked && !llamaCheckbox.checked) {
+                    // If both checkboxes are unchecked, show all biases
+                    runIds = ['4', '5'];
+                }
+                // Reload with the current bias and new run_ids query parameter
+                const newUrl = '/filter_run_ids?run_ids=' + runIds.join(',');
+                window.location.href = newUrl;
+            }
+
+            llamaCheckbox.addEventListener('click', updateRunIds);
+            deepseekCheckbox.addEventListener('click', updateRunIds);
+        });
+
+        // update localStorage whenever the annotator changes
+        document.getElementById('annotator-select').addEventListener('change', function() {
+            localStorage.setItem('selectedAnnotator', this.value);
+        });
+
+        // Save case-list scroll position on scroll
+        document.querySelector('.case-list').addEventListener('scroll', function() {
+            localStorage.setItem('caseListScroll', this.scrollLeft);
+        });
+
+        // Add Speichern button event listener:
+        document.getElementById('save-annotation').addEventListener('click', function() {
+            const selectedRadio = document.querySelector('input[name="bias-type"]:checked');
+            if (!selectedRadio) return;
+            const selectedValue = selectedRadio.value;
+            const annotator = document.getElementById('annotator-select').value;
+            const comment = document.getElementById('annotation-comment').value;
+            fetch('/update_annotation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bias_type_id: selectedValue,
+                    annotator: annotator,
+                    comment: comment,
+                    bias_id: bias.id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // After saving, move to next case
+                document.getElementById('next-case').click();
+            });
+        });
+
+        // Add Nicht überprüfbar button event listener:
+        document.getElementById('nicht-ueberpruefbar-btn').addEventListener('click', function() {
+            const annotator = document.getElementById('annotator-select').value;
+            const comment = document.getElementById('annotation-comment').value;
+
+            fetch('/update_annotation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bias_type_id: 10,
+                    annotator: annotator,
+                    comment: comment,
+                    bias_id: bias.id
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // After saving, move to next case
+                document.getElementById('next-case').click();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // reload the page when the annotator changes:
+        document.getElementById('annotator-select').addEventListener('change', function() {
+            localStorage.setItem('selectedAnnotator', this.value);
+            window.location.reload();
+        });
+
+        //find next unannotated bias case
+        document.getElementById('next-unannotated').addEventListener('click', function() {
+            const currentAnnotator = document.getElementById('annotator-select').value;
+            const allBiases = {{ all_biases | tojson }};
+            let found = false;
+            // Iterate over allBiases to find a case with id greater than the current bias.id
+            // where the current annotator has not annotated it (i.e. not included in arr_annotators)
+            for (let i = 0; i < allBiases.length; i++) {
+                const caseBias = allBiases[i];
+                if (caseBias.id > bias.id && !caseBias.arr_annotators.includes(currentAnnotator)) {
+                    found = true;
+                    navigateToCase(caseBias.id);
+                    break;
+                }
+            }
+            if (!found) {
+                alert('Kein weiterer unbearbeiteter Fall gefunden.');
+            }
+        });
+
+
+        // Helper function for navigation with run_ids parameter
+        function navigateToCase(newBiasId) {
+            const runIdsParam = new URLSearchParams(window.location.search).get('run_ids');
+            window.location.href = `/${newBiasId}${runIdsParam ? '?run_ids=' + runIdsParam : ''}`;
+        }
+
+
+        // Add listener to accordion radio inputs to expand the corresponding panel on change
+        document.querySelectorAll('input[name="bias-type"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                const selectedIndex = this.value;
+                // Show the selected accordion panel
+                const targetCollapse = document.getElementById('guideline-' + selectedIndex);
+                let collapseInstance = bootstrap.Collapse.getInstance(targetCollapse);
+                if (!collapseInstance) {
+                    collapseInstance = new bootstrap.Collapse(targetCollapse, {toggle: false});
+                }
+                collapseInstance.show();
+
+                // Collapse all other accordion panels
+                document.querySelectorAll('.accordion-collapse').forEach(function(el) {
+                    if (el.id !== 'guideline-' + selectedIndex) {
+                        let instance = bootstrap.Collapse.getInstance(el);
+                        if (instance) {
+                            instance.hide();
+                        } else {
+                            new bootstrap.Collapse(el, {toggle: false}).hide();
+                        }
+                    }
+                });
+            });
+        });
+
+
+        // Update navigation button click handlers to use the new function
+        document.getElementById('prev-case').addEventListener('click', function() {
+            const currentAnnotator = document.getElementById('annotator-select').value;
+            const allBiases = {{ all_biases | tojson }};
+            const all_biases_ids = allBiases.map(bias => bias.id);
+            const current_index = all_biases_ids.indexOf(bias.id);
+            const prev_index = current_index - 1;
+            if (prev_index < 0) {
+                alert('Kein vorheriger Fall gefunden.');
+                return;
+            }
+            const prev_bias = allBiases[prev_index];
+            navigateToCase(prev_bias.id);
+        });
+
+        // Update Next-Case button to use the next element from allBiases array.
+        document.getElementById('next-case').addEventListener('click', function() {
+            const currentAnnotator = document.getElementById('annotator-select').value;
+            const allBiases = {{ all_biases | tojson }};
+            const all_biases_ids = allBiases.map(bias => bias.id);
+            const current_index = all_biases_ids.indexOf(bias.id);
+            const next_index = current_index + 1;
+            if (next_index >= all_biases_ids.length) {
+                alert('Kein weiterer Fall gefunden.');
+                return;
+            }
+            const next_bias = allBiases[next_index];
+            navigateToCase(next_bias.id);
+        });
+
+
+        // Implement keyboard shortcuts:
+        document.addEventListener('keydown', function(e) {
+            const activeElem = document.activeElement;
+            const activeTag = activeElem.tagName.toLowerCase();
+
+            // Handle Escape key to blur comment field
+            if (e.key === "Escape" && activeTag === 'textarea') {
+                document.getElementById('annotation-comment').blur();
+                return;
+            }
+
+            // If we're already in the comment field, do not process any shortcut events.
+            if (activeElem.id === 'annotation-comment') {
+                return;
+            }
+
+            // Allow normal typing in input or textarea fields (except for 'c' shortcut)
+            if (activeTag === 'input' || (activeTag === 'textarea' && e.key !== 'c')) return;
+
+            // Add shortcut for activating Nicht überprüfbar with comma key
+            if(e.key === ","){
+                e.preventDefault();
+                document.getElementById("nicht-ueberpruefbar-btn").click();
+                return;
+            }
+
+            switch (e.key) {
+                case "ArrowRight":
+                    e.preventDefault();
+                    document.getElementById('next-case').click();
+                    break;
+                case "ArrowLeft":
+                    e.preventDefault();
+                    document.getElementById('prev-case').click();
+                    break;
+                case "c":
+                case "C":
+                    if (!e.ctrlKey) {
+                        e.preventDefault(); // Prevent 'c' from being typed if Ctrl is not pressed
+                        document.getElementById('annotation-comment').focus();
+                    }
+                    break;
+                case "Enter":
+                    e.preventDefault();
+
+                    // Log the values being sent
+                    const selectedRadioForLog = document.querySelector('input[name="bias-type"]:checked'); // Get selectedRadio again for potentially immediate logging if needed
+                    const selectedValueForLog = selectedRadioForLog ? selectedRadioForLog.value : null;
+                    const annotatorForLog = document.getElementById('annotator-select').value;
+                    const commentForLog = document.getElementById('annotation-comment').value;
+                    const biasIdForLog = bias.id; // bias.id is already available
+                    console.log("Saving annotation with:", {
+                        bias_type_id: selectedValueForLog,
+                        annotator: annotatorForLog,
+                        comment: commentForLog,
+                        bias_id: biasIdForLog
+                    });
+
+                    // First save annotation
+                    const selectedRadio = document.querySelector('input[name="bias-type"]:checked');
+                    if (!selectedRadio) return;
+                    fetch('/update_annotation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            bias_type_id: selectedRadio.value,
+                            annotator: document.getElementById('annotator-select').value,
+                            comment: document.getElementById('annotation-comment').value,
+                            bias_id: bias.id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // After saving, navigate to next case
+                        document.getElementById('next-case').click();
+                    });
+                    break;
+                default:
+                    if (/[0-9]/.test(e.key)) {
+                        let radio = document.querySelector('input[name="bias-type"][value="'+e.key+'"]');
+                        if(radio) { radio.checked = true; }
+                    }
+                    break;
+            }
+        });
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

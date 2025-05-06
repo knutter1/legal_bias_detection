@@ -1,0 +1,249 @@
+[
+  {
+    _id: ObjectId('6761d1f2d5e079cb3f8c6053'),
+    id: 58008,
+    abbreviation: 'BS_SVG_001_IV-2018-35_nodate',
+    court: 'BS_Omni',
+    rawTextFilePath: 'C:\\\\SJP-Data\\\\Downloads_multithreaded\\BS_Omni\\BS_SVG_001_IV-2018-35_nodate.txt',
+    jsonFilePath: 'C:\\\\SJP-Data\\\\Downloads_multithreaded\\BS_Omni\\BS_SVG_001_IV-2018-35_nodate.json',
+    Signatur: 'BS_SVG_001',
+    Spider: 'BS_Omni',
+    Sprache: 'de',
+    Datum: '2021-01-01',
+    HTML: {
+      Datei: 'BS_Omni/BS_SVG_001_IV-2018-35_nodate.html',
+      URL: '/cgi-bin/nph-omniscgi.exe?OmnisPlatform=WINDOWS&WebServerUrl=&WebServerScript=/cgi-bin/nph-omniscgi.exe&OmnisLibrary=JURISWEB&OmnisClass=rtFindinfoWebHtmlService&OmnisServer=JURISWEB,7000&Parametername=WEB&Schema=BS_FI_WEB&Source=&Aufruf=getMarkupDocument&cSprache=DE&nF30_KEY=61555&W10_KEY=1229932&nTrefferzeile=44&Template=search_result_document.html',
+      Checksum: '884af6568035892e5df518b319ebf129'
+    },
+    Num: [ 'IV.2018.35', 'SVG.2018.205' ],
+    Kopfzeile: [
+      {
+        Sprachen: [ 'de' ],
+        Text: 'Basel-Stadt Sozialversicherungsgericht IV.2018.35 (SVG.2018.205)'
+      },
+      {
+        Sprachen: [ 'fr' ],
+        Text: 'Bâle-Ville Sozialversicherungsgericht IV.2018.35 (SVG.2018.205)'
+      },
+      {
+        Sprachen: [ 'it' ],
+        Text: 'Basilea Città Sozialversicherungsgericht IV.2018.35 (SVG.2018.205)'
+      }
+    ],
+    Meta: [
+      {
+        Sprachen: [ 'de' ],
+        Text: 'Basel-Stadt Sozialversicherungsgericht '
+      },
+      {
+        Sprachen: [ 'fr' ],
+        Text: 'Bâle-Ville Sozialversicherungsgericht '
+      },
+      {
+        Sprachen: [ 'it' ],
+        Text: 'Basilea Città Sozialversicherungsgericht '
+      }
+    ],
+    Abstract: [
+      { Sprachen: [ 'de', 'fr', 'it' ], Text: 'Rückforderung; Erlass' }
+    ],
+    ScrapyJob: '446973/46/912',
+    'Zeit UTC': '11.02.2023 03:50:57',
+    Checksum: '26b704645c2e5b7698ba9a527b86a330',
+    language: 'de',
+    num_characters: 24062,
+    selected_for_smaller_experiment: true,
+    ollama_responses: [
+      {
+        id: 'e652d6cd-bb2a-43a6-8dbd-368bc87b8e4b',
+        model: 'llama3.3',
+        response: {
+          original_text: 'Identifizierter Bias: Altersdiskriminierung\n' +
+            'Textpassage: "A____ (Beschwerdeführer), geboren am [...] 1960, bezog seit dem 1. Dezember 2000 eine ganze Rente der Eidgenössischen Invalidenversicherung"\n' +
+            'Begründung: Die Passage erwähnt das Alter des Beschwerdeführers und seine Rentenbezugsdauer, was darauf hindeuten könnte, dass Altersdiskriminierung eine Rolle in der Entscheidungsfindung spielen könnte. Allerdings ist dies nicht explizit der Fall, da die Altersangabe lediglich als Kontextinformation dient und keine direkte Diskriminierung erkennbar ist.\n' +
+            '\n' +
+            'Identifizierter Bias: Bias durch sozioökonomischen Status\n' +
+            'Textpassage: "Die Beschwerdegegnerin hatte zwar in der Verfügung vom 15. Februar 2018 (IV-Akte 196) festgehalten, man verzichte angesichts der finanziellen Situation des Beschwerdeführers einstweilen, also vorläufig, auf die Eintreibung der Schuld."\n' +
+            'Begründung: Die Passage zeigt, dass die finanzielle Situation des Beschwerdeführers bei der Entscheidungsfindung berücksichtigt wurde. Dies könnte darauf hindeuten, dass der sozioökonomische Status eine Rolle in der Entscheidungsfindung spielte, da die finanzielle Situation als Faktor für die Eintreibung der Schuld herangezogen wurde.\n' +
+            '\n' +
+            'Es ist jedoch zu beachten, dass diese Biases nicht explizit oder offensichtlich sind und möglicherweise auch durch andere Faktoren erklärt werden können. Eine detailliertere Analyse des Kontexts und der Entscheidungsfindung wäre erforderlich, um eine definitive Aussage über die Anwesenheit von Biases zu treffen.',
+          biases: [
+            {
+              id: 181,
+              summary: 'Hier ist eine Zusammenfassung des Urteils:\n' +
+                '\n' +
+                '**Parteien:** \n' +
+                '- Kläger/Antragsteller: A____, vertreten durch lic. iur. B____, Advokat\n' +
+                '- Beklagter: IV-Stelle Basel-Stadt, Rechtsdienst\n' +
+                '- Richter: lic. iur. K. Zehnder (Vorsitz), lic. phil. D. Borer, lic. iur. R. Schnyder und Gerichtsschreiberin lic. iur. S. Dreyer\n' +
+                '\n' +
+                '**Gericht & Verfahren:** \n' +
+                '- Gericht: Sozialversicherungsgericht des Kantons Basel-Stadt\n' +
+                '- Anzahl und Art der Vorinstanzen: 1 Instanz (IV-Stelle), keine weiteren Vorinstanzen genannt\n' +
+                '- Entscheidungsdatum: 27. Juni 2018\n' +
+                '- Rechtsmittel: Ja, Beschwerde möglich\n' +
+                '- Rechtskräftigkeit: Ja\n' +
+                '\n' +
+                '**Sachverhalt:** \n' +
+                '- Art des Vorfalls: Streit um Rückerstattung von Invalidenrenten\n' +
+                '- Medizinische Details: Keine spezifischen medizinischen Details genannt\n' +
+                '- Erwerbsstatus vor/nach dem Vorfall: Der Beschwerdeführer bezog eine ganze Rente der Eidgenössischen Invalidenversicherung, die später rückwirkend eingestellt wurde\n' +
+                '\n' +
+                '**Rechtliches:** \n' +
+                '- Relevante Gesetze/Regelungen: Bundesgesetz über den Allgemeinen Teil des Sozialversicherungsrechts (ATSG), Invalidenversicherungsgesetz (IVG)\n' +
+                '- Anzahl der zitierten Gesetze: 2\n' +
+                '- Anzahl der zitierten medizinischen Gutachten/Berichte: 2 (rheumatologisches und psychiatrisches Gutachten)\n' +
+                '- Verwendete Argumentationsquellen: Bundesgerichtsurteile, Gesetzeskommentare\n' +
+                '\n' +
+                '**Entscheidung:** \n' +
+                '- Entscheidungsgründe: Die Rückerstattungsverfügung basiert auf der rechtskräftigen Einstellungsverfügung; der gute Glaube des Beschwerdeführers ist zu bejahen\n' +
+                "- Tenor: Die Beschwerde gegen die Rückerstattungsverfügung wird abgewiesen, die Beschwerde gegen die Ablehnung des Erlassgesuchs wird gutgeheissen; der Beschwerdeführer erhält eine Parteientschädigung von Fr. 2'000.- zuzüglich Mehrwertsteuer",
+              origin_url: 'https://entscheidsuche.ch/docs/BS_Omni/BS_SVG_001_IV-2018-35_nodate.html',
+              run_id: 4,
+              bias_type_id: 5,
+              bias_type_name: 'Altersdiskriminierung',
+              textpassage: '"A____ (Beschwerdeführer), geboren am [...] 1960, bezog seit dem 1. Dezember 2000 eine ganze Rente der Eidgenössischen Invalidenversicherung"',
+              reasoning: 'Die Passage erwähnt das Alter des Beschwerdeführers und seine Rentenbezugsdauer, was darauf hindeuten könnte, dass Altersdiskriminierung eine Rolle in der Entscheidungsfindung spielen könnte. Allerdings ist dies nicht explizit der Fall, da die Altersangabe lediglich als Kontextinformation dient und keine direkte Diskriminierung erkennbar ist.',
+              annotations: [
+                {
+                  annotator: 'Tom Herzberg',
+                  bias_type_id: 0,
+                  comment: '',
+                  bias_id: 181,
+                  timestamp: 1744743946.6689668
+                },
+                {
+                  annotator: 'Sabine Wehnert',
+                  bias_type_id: 0,
+                  comment: '',
+                  bias_id: 181,
+                  timestamp: 1744803293.468478
+                }
+              ]
+            },
+            {
+              id: 182,
+              summary: 'Hier ist eine Zusammenfassung des Urteils:\n' +
+                '\n' +
+                '**Parteien:** \n' +
+                '- Kläger/Antragsteller: A____, vertreten durch lic. iur. B____, Advokat\n' +
+                '- Beklagter: IV-Stelle Basel-Stadt, Rechtsdienst\n' +
+                '- Richter: lic. iur. K. Zehnder (Vorsitz), lic. phil. D. Borer, lic. iur. R. Schnyder und Gerichtsschreiberin lic. iur. S. Dreyer\n' +
+                '\n' +
+                '**Gericht & Verfahren:** \n' +
+                '- Gericht: Sozialversicherungsgericht des Kantons Basel-Stadt\n' +
+                '- Anzahl und Art der Vorinstanzen: 1 Instanz (IV-Stelle), keine weiteren Vorinstanzen genannt\n' +
+                '- Entscheidungsdatum: 27. Juni 2018\n' +
+                '- Rechtsmittel: Ja, Beschwerde möglich\n' +
+                '- Rechtskräftigkeit: Ja\n' +
+                '\n' +
+                '**Sachverhalt:** \n' +
+                '- Art des Vorfalls: Streit um Rückerstattung von Invalidenrenten\n' +
+                '- Medizinische Details: Keine spezifischen medizinischen Details genannt\n' +
+                '- Erwerbsstatus vor/nach dem Vorfall: Der Beschwerdeführer bezog eine ganze Rente der Eidgenössischen Invalidenversicherung, die später rückwirkend eingestellt wurde\n' +
+                '\n' +
+                '**Rechtliches:** \n' +
+                '- Relevante Gesetze/Regelungen: Bundesgesetz über den Allgemeinen Teil des Sozialversicherungsrechts (ATSG), Invalidenversicherungsgesetz (IVG)\n' +
+                '- Anzahl der zitierten Gesetze: 2\n' +
+                '- Anzahl der zitierten medizinischen Gutachten/Berichte: 2 (rheumatologisches und psychiatrisches Gutachten)\n' +
+                '- Verwendete Argumentationsquellen: Bundesgerichtsurteile, Gesetzeskommentare\n' +
+                '\n' +
+                '**Entscheidung:** \n' +
+                '- Entscheidungsgründe: Die Rückerstattungsverfügung basiert auf der rechtskräftigen Einstellungsverfügung; der gute Glaube des Beschwerdeführers ist zu bejahen\n' +
+                "- Tenor: Die Beschwerde gegen die Rückerstattungsverfügung wird abgewiesen, die Beschwerde gegen die Ablehnung des Erlassgesuchs wird gutgeheissen; der Beschwerdeführer erhält eine Parteientschädigung von Fr. 2'000.- zuzüglich Mehrwertsteuer",
+              origin_url: 'https://entscheidsuche.ch/docs/BS_Omni/BS_SVG_001_IV-2018-35_nodate.html',
+              run_id: 4,
+              bias_type_id: 9,
+              bias_type_name: 'Bias durch sozioökonomischen Status',
+              textpassage: '"Die Beschwerdegegnerin hatte zwar in der Verfügung vom 15. Februar 2018 (IV-Akte 196) festgehalten, man verzichte angesichts der finanziellen Situation des Beschwerdeführers einstweilen, also vorläufig, auf die Eintreibung der Schuld."',
+              reasoning: 'Die Passage zeigt, dass die finanzielle Situation des Beschwerdeführers bei der Entscheidungsfindung berücksichtigt wurde. Dies könnte darauf hindeuten, dass der sozioökonomische Status eine Rolle in der Entscheidungsfindung spielte, da die finanzielle Situation als Faktor für die Eintreibung der Schuld herangezogen wurde.\n' +
+                '\n' +
+                'Es ist jedoch zu beachten, dass diese Biases nicht explizit oder offensichtlich sind und möglicherweise auch durch andere Faktoren erklärt werden können. Eine detailliertere Analyse des Kontexts und der Entscheidungsfindung wäre erforderlich, um eine definitive Aussage über die Anwesenheit von Biases zu treffen.',
+              annotations: [
+                {
+                  annotator: 'Tom Herzberg',
+                  bias_type_id: 0,
+                  comment: '',
+                  bias_id: 182,
+                  timestamp: 1744743947.638623
+                },
+                {
+                  annotator: 'Sabine Wehnert',
+                  bias_type_id: 0,
+                  comment: '',
+                  bias_id: 182,
+                  timestamp: 1744803694.3302987
+                }
+              ]
+            }
+          ]
+        },
+        time_taken: 103.87,
+        timestamp: 1737554293.3235307,
+        run_id: 4
+      },
+      {
+        id: 'd93ec087-cac7-4f6c-96a0-73dcbc6ab84f',
+        model: 'deepseek-r1:70b',
+        response: {
+          original_text: '<think>\n' +
+            "Okay, so I need to analyze this German court decision text for any biases as defined by the given categories. Let me go through each bias type one by one and see if there's anything that stands out.\n" +
+            '\n' +
+            `First, Gender-Bias: The text is about a disability insurance case, and I don't see any mention of gender-specific terms or stereotypes. All parties involved are referred to by their titles like "lic. iur." without indicating gender, so no obvious gender bias here.\n` +
+            '\n' +
+            "Next, Religiöser Bias (Religious Bias): There's nothing in the text that mentions religion or religious groups. The case is purely about legal and medical aspects of disability insurance, so I don't think there's a religious angle.\n" +
+            '\n' +
+            "Rassistischer Bias (Racist Bias): Again, no indication of race or ethnicity being discussed. The focus is on the legal process and medical evaluations, so this doesn't seem applicable.\n" +
+            '\n' +
+            "Sexuelle Orientierung Bias: There's no mention of anyone's sexual orientation in the text. It's all about disability assessments and legal procedures, so nothing here either.\n" +
+            '\n' +
+            "Altersdiskriminierung (Age Discrimination): The plaintiff was born in 1960, but age isn't used as a criterion for discrimination in this context. The decision is based on medical evaluations and legal timelines, not age-related stereotypes.\n" +
+            '\n' +
+            'Nationalität-Bias: No nationality issues are discussed. All parties seem to be part of the same legal system without any mention of national origin affecting the case.\n' +
+            '\n' +
+            "Behinderungen-Bias (Disability Bias): Hmm, this might be a point. The text discusses the plaintiff's disability and the termination of benefits. However, it's based on medical assessments and legal procedures. I don't see negative stereotypes about disabilities; instead, it's a factual discussion about eligibility criteria.\n" +
+            '\n' +
+            "Erscheinung-Bias (Appearance Bias): There's no mention of anyone's appearance influencing the decision. It's all about medical and legal factors.\n" +
+            '\n' +
+            "Bias durch sozioökonomischen Status: The text doesn't discuss socioeconomic status beyond the financial implications of the disability benefits, which is part of the case itself, not a bias against a particular group.\n" +
+            '\n' +
+            "After reviewing each category, I don't see any clear biases in the provided text. It's focused on legal and medical facts without targeting specific groups negatively based on inherent characteristics.\n" +
+            '</think>\n' +
+            '\n' +
+            'Kein Bias'
+        },
+        time_taken: 115.35,
+        timestamp: 1737584933.5834649,
+        run_id: 5
+      }
+    ],
+    summary: 'Hier ist eine Zusammenfassung des Urteils:\n' +
+      '\n' +
+      '**Parteien:** \n' +
+      '- Kläger/Antragsteller: A____, vertreten durch lic. iur. B____, Advokat\n' +
+      '- Beklagter: IV-Stelle Basel-Stadt, Rechtsdienst\n' +
+      '- Richter: lic. iur. K. Zehnder (Vorsitz), lic. phil. D. Borer, lic. iur. R. Schnyder und Gerichtsschreiberin lic. iur. S. Dreyer\n' +
+      '\n' +
+      '**Gericht & Verfahren:** \n' +
+      '- Gericht: Sozialversicherungsgericht des Kantons Basel-Stadt\n' +
+      '- Anzahl und Art der Vorinstanzen: 1 Instanz (IV-Stelle), keine weiteren Vorinstanzen genannt\n' +
+      '- Entscheidungsdatum: 27. Juni 2018\n' +
+      '- Rechtsmittel: Ja, Beschwerde möglich\n' +
+      '- Rechtskräftigkeit: Ja\n' +
+      '\n' +
+      '**Sachverhalt:** \n' +
+      '- Art des Vorfalls: Streit um Rückerstattung von Invalidenrenten\n' +
+      '- Medizinische Details: Keine spezifischen medizinischen Details genannt\n' +
+      '- Erwerbsstatus vor/nach dem Vorfall: Der Beschwerdeführer bezog eine ganze Rente der Eidgenössischen Invalidenversicherung, die später rückwirkend eingestellt wurde\n' +
+      '\n' +
+      '**Rechtliches:** \n' +
+      '- Relevante Gesetze/Regelungen: Bundesgesetz über den Allgemeinen Teil des Sozialversicherungsrechts (ATSG), Invalidenversicherungsgesetz (IVG)\n' +
+      '- Anzahl der zitierten Gesetze: 2\n' +
+      '- Anzahl der zitierten medizinischen Gutachten/Berichte: 2 (rheumatologisches und psychiatrisches Gutachten)\n' +
+      '- Verwendete Argumentationsquellen: Bundesgerichtsurteile, Gesetzeskommentare\n' +
+      '\n' +
+      '**Entscheidung:** \n' +
+      '- Entscheidungsgründe: Die Rückerstattungsverfügung basiert auf der rechtskräftigen Einstellungsverfügung; der gute Glaube des Beschwerdeführers ist zu bejahen\n' +
+      "- Tenor: Die Beschwerde gegen die Rückerstattungsverfügung wird abgewiesen, die Beschwerde gegen die Ablehnung des Erlassgesuchs wird gutgeheissen; der Beschwerdeführer erhält eine Parteientschädigung von Fr. 2'000.- zuzüglich Mehrwertsteuer"
+  }
+]
