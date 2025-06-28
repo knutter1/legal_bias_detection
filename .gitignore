@@ -2,4 +2,9 @@ logs/
 venv/
 __pycache__/
 text_files/
-.idea/vcs.xml
+.idea/
+plots/
+annotation_comparison.csv
+useful_commands.py
+watchdog.py
+
