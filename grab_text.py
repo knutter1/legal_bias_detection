@@ -15,9 +15,33 @@ def connect_to_mongo():
     # print("MongoDB connected and database/collection created.")
     return collection
 
+
 def clean_text(text):
-    """Bereinigt den eingegebenen Text, indem das Muster 'Seite <Zahl>' entfernt wird."""
-    return re.sub(r"Seite \d+", "", text)
+    """
+    Bereinigt den eingegebenen Text, indem NBSP-Zeichen, unnötige
+    Zeilenumbrüche und überflüssige Leerzeichen entfernt werden.
+    """
+    # 1. Ersetzen von NBSP-Zeichen durch reguläre Leerzeichen.
+    text = text.replace('\xa0', '')
+
+    # 2. Ersetzen von Zeilenumbrüchen, denen kein Satzzeichen (., ?, !) vorausgeht,
+    #    durch ein Leerzeichen. Dies entfernt unnötige Umbrüche innerhalb eines Satzes.
+    text = re.sub(r'(?<!\w\.)\n(?!\n)', ' ', text)
+    # Erklärung des Regex:
+    # (?<!\w\.) : Negative Lookbehind. Stellt sicher, dass das Zeichen vor dem \n kein
+    #             Buchstabe oder eine Ziffer gefolgt von einem Punkt ist.
+    # \n        : Matcht einen Zeilenumbruch.
+    # (?!\n)    : Negative Lookahead. Stellt sicher, dass der Zeilenumbruch nicht
+    #             von einem weiteren Zeilenumbruch gefolgt wird.
+
+    # 3. Entfernen des Musters "Seite <Zahl>".
+    text = re.sub(r"Seite \d+", "", text)
+
+    # 4. Ersetzen von mehreren Leerzeichen (inkl. Zeilenumbrüchen, die nicht zu Absätzen gehören)
+    #    durch ein einziges Leerzeichen.
+    text = re.sub(r'\s{2,}', ' ', text).strip()
+
+    return text
 
 
 def download_file(url, temp_dir, max_retries=10):

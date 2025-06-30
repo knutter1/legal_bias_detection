@@ -2144,7 +2144,7 @@ bias_id,sabine_type,tom_type,sabine_comment
 10,343,343
 
 --- Kreuztabelle Tom (Zeilen) vs Sabine (Spalten) ---
-tom/sabine,0,1,2,3,4,5,6,7,8,9,10
+tom_type,0,1,2,3,4,5,6,7,8,9,10
 0,1198,2,0,1,0,0,0,1,2,3,0
 1,3,7,0,0,0,0,0,0,0,0,0
 2,0,0,0,0,0,0,0,0,0,0,0
@@ -2160,3 +2160,5 @@ tom/sabine,0,1,2,3,4,5,6,7,8,9,10
 --- Einigkeit der Annotatoren ---
 Einigkeit (gesamt): 98.09% (1590/1621)
 Einigkeit ohne bias_type_id==10: 97.57% (1247/1278)
+Cohen's Kappa (ohne Gewichtung): 0.952
+Cohen's Kappa (quadratisch gewichtet): 0.981

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urteilsannotator</title>
+    <title>Judgment Annotation</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/split.js/dist/split.min.css" rel="stylesheet">
     <style>
@@ -126,15 +126,15 @@
 
         <div class="d-flex gap-3 p-3 border-bottom align-items-center">
             <div class="d-flex flex-column ms-3" style="font-size: 0.8rem;">
-                <div class="mb-1">Zeige Bias-Fälle von:</div>
+                <div class="mb-1">Show bias cases from:</div>
                 <div class="d-flex flex-column gap-0">
-                    <div class="form-check" title="Zeige Bias-Ergebnisse von Llama3.3">
+                    <div class="form-check" title="Show bias results from Llama3.3">
                         <input class="form-check-input" type="checkbox" id="llama-checkbox" value="4" {% if run_ids is defined and (4 in run_ids) %}checked{% endif %}>
                         <label class="form-check-label" for="llama-checkbox">
                             llama3.3 ({{ all_biases | selectattr('run_id', 'equalto', 4) | list | length }})
                         </label>
                     </div>
-                    <div class="form-check" title="Zeige Bias-Ergebnisse von DeepSeek">
+                    <div class="form-check" title="Show bias results from DeepSeek">
                         <input class="form-check-input" type="checkbox" id="deepseek-checkbox" value="5" {% if run_ids is defined and (5 in run_ids) %}checked{% endif %}>
                         <label class="form-check-label" for="deepseek-checkbox">
                             deepseek-r1 ({{ all_biases | selectattr('run_id', 'equalto', 5) | list | length }})
@@ -151,7 +151,7 @@
                 {% endfor %}
             </div>
 
-            <select class="form-select" id="annotator-select" style="width: 15%;">
+            <select class="form-select" id="annotator-select" style="width: 15%;" title="Select annotator">
                 <option>Kilian Lüders</option>
                 <option>Sabine Wehnert</option>
                 <option>Tom Herzberg</option>
@@ -160,9 +160,9 @@
 
         <div class="d-flex flex-grow-1" id="split-container" style="height: 100vh;">
             <div class="resizable scrollable p-3 border-end" style="flex: 1; min-width: 0;">
-                <strong>Fall {{ bias.id }}</strong>
+                <strong>Case {{ bias.id }}</strong>
                 <div id="summary-content"></div>
-                <a href="#" id="original-link">Originaltext</a>
+                <a href="#" id="original-link">Original text</a>
             </div>
 
             <div class="resizable scrollable p-3 border-end middle-panel" style="flex: 1; min-width: 0;">
@@ -172,28 +172,28 @@
                     </div>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <label for="annotation-comment" class="mb-0">Kommentar des Annotators</label>
+                            <label for="annotation-comment" class="mb-0">Annotator's comment</label>
                             <button id="nicht-ueberpruefbar-btn" type="button" class="btn btn-outline-danger rounded">
-                                Nicht überprüfbar
+                                Not verifiable
                             </button>
                         </div>
                         <textarea class="form-control auto-height" id="annotation-comment"></textarea>
                     </div>
                     <div class="d-flex justify-content-between align-items-center">
-                        <button class="btn btn-outline-secondary" id="prev-case">← Vorheriges</button>
-                        <button class="btn btn-primary" id="save-annotation">Speichern</button>
-                        <button class="btn btn-outline-secondary" id="next-case">Nächstes →</button>
+                        <button class="btn btn-outline-secondary" id="prev-case">← Previous</button>
+                        <button class="btn btn-primary" id="save-annotation">Save</button>
+                        <button class="btn btn-outline-secondary" id="next-case">Next →</button>
                     </div>
                     <div class="d-flex justify-content-end mt-2">
-                        <button class="btn btn-outline-secondary" id="next-unannotated" title="Springe zum nächsten unbearbeiteten Fall">Nächster unbearbeiteter</button>
+                        <button class="btn btn-outline-secondary" id="next-unannotated" title="Jump to next unannotated case">Next unannotated</button>
                     </div>
                 </div>
                 <div class="shortcuts d-flex justify-content-between mt-auto">
-                    Shortcuts: ←, → zum Fälle skippen<br>
-                    Enter zum Speichern der Annotation<br>
-                    C um in Kommentarblock zu springen<br>
-                    0-9 um Bias-Kategorie auszuwählen (0 = Kein Bias)<br>
-                    , um "Nicht überprüfbar" auszulösen
+                    Shortcuts: ←, → to skip cases<br>
+                    Enter to save annotation<br>
+                    C to jump to comment<br>
+                    0-9 to select bias category (0 = No bias)<br>
+                    , to trigger "Not verifiable"
                 </div>
             </div>
 
@@ -260,11 +260,11 @@
             // Update the middle panel with bias fields
             const biasDiv = document.getElementById('bias-content');
             biasDiv.innerHTML = `
-            <div class="bias-field" title="Erkannter Bias"><strong>Erkannter Bias:</strong> ${bias.bias_type_name}</div>
+            <div class="bias-field" title="Detected Bias"><strong>Detected Bias:</strong> ${bias.bias_type_name}</div>
             <hr class="divider">
-            <div class="bias-field" title="Textpassage"><strong>Textpassage:</strong> ${bias.textpassage}</div>
+            <div class="bias-field" title="Text passage"><strong>Text passage:</strong> ${bias.textpassage}</div>
             <hr class="divider">
-            <div class="bias-field" title="Begründung"><strong>Begründung:</strong> ${bias.reasoning}</div>
+            <div class="bias-field" title="Reasoning"><strong>Reasoning:</strong> ${bias.reasoning}</div>
             `;
 
             const currentAnnotator = document.getElementById('annotator-select').value;
@@ -320,7 +320,7 @@
             if (currentIndex > 1) {
                 visibleItems[currentIndex - 1].click();
             } else {
-                alert('Kein vorheriger Fall gefunden.');
+                alert('No previous case found.');
             }
         }
 
@@ -333,7 +333,7 @@
             if (currentIndex < visibleItems.length - 1) {
                 visibleItems[currentIndex + 1].click();
             } else {
-                alert('Kein weiterer Fall gefunden.');
+                alert('No next case found.');
             }
         }
 
@@ -499,7 +499,7 @@
 
 
             if (!found) {
-                alert('Kein weiterer unbearbeiteter Fall gefunden.');
+                alert('No next unannotated case found.');
             }
         });
 

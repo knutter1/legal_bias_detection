@@ -4,6 +4,8 @@ from pymongo import MongoClient
 from collections import defaultdict
 from sklearn.metrics import cohen_kappa_score
 import time
+import json
+from grab_text import get_clean_text_by_id_online
 
 class AnnotationComparer:
     def __init__(self,
@@ -369,15 +371,9 @@ class InterAnnotatorAgreement:
         print("-" * 50)
 
 
+def kilian_annotationen_vergleich(annotator_1 = 'Sabine Wehnert', annotator_2 = 'Kilian Lüders'):
 
-if __name__ == '__main__':
-    #comparer = AnnotationComparer()
-    #comparer.write_csv()
-
-    ANNOTATOR_1 = 'Sabine Wehnert' # Ersetzt 'Tom Herzberg' aus dem Beispiel
-    ANNOTATOR_2 = 'Kilian Lüders'
-
-    analyzer = InterAnnotatorAgreement(annotator1=ANNOTATOR_1, annotator2=ANNOTATOR_2)
+    analyzer = InterAnnotatorAgreement(annotator1=annotator_1, annotator2=annotator_2)
     if analyzer.client:
         # 1. Neue Annotationen für Kilian Lüders definieren und einfügen
         annotations_for_kilian = [
@@ -404,7 +400,116 @@ if __name__ == '__main__':
         analyzer.calculate_and_print_agreement()
 
         # 3. Die Zählung für den Annotator ausgeben
-        analyzer.print_annotation_counts_for_annotator(ANNOTATOR_2)
+        analyzer.print_annotation_counts_for_annotator(annotator_2)
+
+
+def export_kilian_annotations_to_json(output_filename="annotation_data.json"):
+    """
+    Sucht alle von 'Kilian Lüders' annotierten Biases, holt zugehörige Daten
+    inklusive des Originaltextes und speichert das Ergebnis als JSON-Datei.
+    """
+    # Mapping-Liste für bias_type_id zu Name
+    VALID_BIASES = [
+        "Kein Bias",
+        "Gender-Bias",
+        "Religiöser Bias",
+        "Rassistischer Bias",
+        "Sexuelle Orientierung Bias",
+        "Altersdiskriminierung",
+        "Nationalität-Bias",
+        "Behinderungen-Bias",
+        "Erscheinung-Bias",
+        "Bias durch sozioökonomischen Status",
+        "Ungültige Antwortstruktur"
+    ]
+
+    print(f"\n--- Starte Export für Annotator 'Kilian Lüders' ---")
+    try:
+        client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
+        client.admin.command('ismaster')
+        db = client['court_decisions']
+        collection = db['judgments']
+        print("MongoDB-Verbindung erfolgreich hergestellt.")
+    except Exception as e:
+        print(f"Fehler bei der Verbindung mit MongoDB: {e}")
+        return
+
+    # Aggregation Pipeline, um die benötigten, von Kilian Lüders annotierten Daten zu extrahieren
+    pipeline = [
+        # 1. Finde nur Dokumente, die überhaupt eine Annotation von Kilian Lüders haben
+        {'$match': {'ollama_responses.response.biases.annotations.annotator': 'Kilian Lüders'}},
+        # 2. Entpacke das ollama_responses Array
+        {'$unwind': '$ollama_responses'},
+        # 3. Entpacke das biases Array
+        {'$unwind': '$ollama_responses.response.biases'},
+        # 4. Filtere erneut, um nur die Bias-Einträge zu behalten, die tatsächlich von K.L. annotiert wurden
+        {'$match': {'ollama_responses.response.biases.annotations.annotator': 'Kilian Lüders'}},
+        # 5. Füge ein temporäres Feld mit nur Kilians Annotation hinzu, um leichter darauf zugreifen zu können
+        {'$addFields': {
+            'kilian_annotation': {
+                '$first': {
+                    '$filter': {
+                        'input': '$ollama_responses.response.biases.annotations',
+                        'as': 'ann',
+                        'cond': {'$eq': ['$$ann.annotator', 'Kilian Lüders']}
+                    }
+                }
+            }
+        }},
+        # 6. Projiziere die finale Struktur der Daten
+        {'$project': {
+            '_id': 0,
+            'doc_id': '$_id',  # Behalte die Document-ID für den Textabruf
+            'bias_id': '$ollama_responses.response.biases.id',
+            'summary': '$ollama_responses.response.biases.summary',
+            'origin_url': '$ollama_responses.response.biases.origin_url',
+            'response_model': '$ollama_responses.model',
+            'response_bias_type_id': '$ollama_responses.response.biases.bias_type_id',
+            'textpassage': '$ollama_responses.response.biases.textpassage',
+            'reasoning': '$ollama_responses.response.biases.reasoning',
+            'kilian_bias_type_id': '$kilian_annotation.bias_type_id',
+            'annotations': '$ollama_responses.response.biases.annotations'
+        }}
+    ]
+
+    results_from_db = list(collection.aggregate(pipeline, allowDiskUse=True))
+    print(f"{len(results_from_db)} Annotationen von 'Kilian Lüders' in der Datenbank gefunden.")
+
+    final_data = []
+    for item in results_from_db:
+        print(f"Verarbeite bias_id: {item['bias_id']} (aus Dokument-ID: {item['doc_id']})")
+
+        # NEU: Füge den Namen des Bias-Typs basierend auf der ID hinzu
+        kilian_id = item.get('kilian_bias_type_id')
+        bias_name = "Unbekannt"  # Standardwert, falls ID ungültig ist
+        if kilian_id is not None and 0 <= kilian_id < len(VALID_BIASES):
+            bias_name = VALID_BIASES[kilian_id]
+        item['kilian_bias_type_name'] = bias_name
+
+        # Hole den Originaltext mithilfe der Funktion aus grab_text.py
+        origin_text = get_clean_text_by_id_online(item['doc_id'])
+        item['origin_text'] = origin_text
+
+        # Entferne die temporäre doc_id
+        del item['doc_id']
+
+        final_data.append(item)
+
+    # Speichere die Daten in einer JSON-Datei
+    with open(output_filename, 'w', encoding='utf-8') as f:
+        json.dump(final_data, f, ensure_ascii=False, indent=4)
+
+    print(f"Daten erfolgreich in '{output_filename}' gespeichert.")
+    client.close()
+
+
+
+if __name__ == '__main__':
+
+    # Neue Funktion aufrufen, um die JSON-Datei zu erzeugen
+    export_kilian_annotations_to_json()
+
+
 
 
 
