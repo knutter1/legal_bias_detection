@@ -500,6 +500,6 @@ if __name__ == "__main__":
     # Funktionsaufruf
     # analyse_response_correlations()
     #print(parse_ollama_responses(run_id=4))
-    print(parse_ollama_responses(run_id=5))
+    print(parse_ollama_responses(run_id=9))
 
     # analyze_token_ratio()

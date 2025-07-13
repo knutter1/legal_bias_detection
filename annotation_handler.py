@@ -1,5 +1,100 @@
 """T. Artstein & M. Poesio, "Inter-Coder Agreement for Computational Linguistics," Computational Linguistics, 2008."""
 
+GUIDELINES_ENGLISH = [
+"None of the specified biases are present in the text passage.",
+"""Gender bias refers to the systematic unequal treatment of individuals based on gender.
+Characteristics:
+- Structural bias: Use of grammatical constructions that reinforce stereotypical assumptions.
+- Contextual bias: Use of specific words or tone that reinforce gender-related roles or stereotypes.
+Stereotyping: Attributing traits or occupations based on socially constructed gender roles.
+Identify gender bias by:
+- Analyzing word associations (e.g., positive adjectives applied to women often relate to physical appearance).
+- Reviewing occupational terms for gender stereotypes.
+- Examining grammatical structures for gender-based generalizations.""",
+"""Religious bias refers to implicit attitudes and prejudices that often operate below conscious awareness and can hinder interfaith cooperation.
+Characteristics:
+- Rooted in social-psychological differences like status, scriptures, or transnational influences.
+- Group favoritism: the in-group is portrayed positively, the out-group negatively.
+- Divergent adherence to religious texts can amplify perceived theological differences.
+Identify this bias by:
+- Investigating implicit prejudices.
+- Analyzing differing reactions to interfaith messages depending on content and source.
+- Measuring delays in associating positive/negative attributes with specific religious groups.""",
+"""Racial bias can be either implicit (largely unconscious) or explicit (conscious). Both are widespread and have serious negative effects.
+Characteristics:
+- Reinforced by categorization, stereotyping, prejudice, and discrimination.
+- Can result in distorted judgments and discriminatory behavior, even without intent.
+Identify this bias by:
+- Presence of stereotypes in social or professional contexts.
+- Skewed judgments or behaviors under uncertainty or time pressure.
+- Differential treatment based on group characteristics.""",
+"""Sexual orientation bias involves the conscious or unconscious disadvantage of individuals based on their sexual preference, especially in the workplace, education, or other social contexts.
+Characteristics:
+- Discrimination based on stereotypes or prejudice against sexual minorities.
+- Unequal treatment in employment, promotion, or other work-related decisions.
+- Denial of equal rights or access to services.
+Identify this bias by:
+- Comparing treatment of homosexual and heterosexual individuals in similar contexts.
+- Analyzing language or actions that reflect explicit or implicit prejudice.
+- Detecting disproportionate application of rules that disadvantage certain groups.""",
+"""Age discrimination refers to unequal treatment or disadvantage based on age, unless justified by legitimate social policy or objective reasons. This includes both direct and indirect discrimination.
+Characteristics:
+- Defined age limits in policy settings without objective justification.
+- Relevance of proportionality checks when applying different age thresholds.
+Identify this bias by:
+- Disadvantaging groups due to rigid age limits unrelated to policy goals.
+- Age thresholds that restrict access to public benefits.
+- Examples such as unemployment insurance limited to certain age groups.""",
+"""Nationality bias involves the systematic distortion of how countries or their citizens are portrayed, often through stereotypes or demeaning depictions.
+Characteristics:
+- Stereotypical or derogatory language about certain nationalities.
+- Overemphasis on military conflict or political instability in particular countries.
+Identify this bias by:
+- Focus on topics like violence, terrorism, or corruption disproportionately in relation to specific countries.""",
+"""Bias against people with disabilities refers to automatically triggered, unconscious attitudes that result in negative perceptions or treatment. These are often based on societal stereotypes.
+Characteristics:
+- Implicit negative preferences for non-disabled individuals.
+- Automatic associations of disability with negative concepts (e.g., "bad," "incompetent").
+- Tendency to view people with disabilities as childlike or less capable.
+Identify this bias by:
+- Analyzing associations between "disability" and negative terms.
+- Identifying subtle language implying lack of competence or autonomy.
+- Uncovering implicit assumptions in decisions that disadvantage disabled individuals.""",
+"""Physical attractiveness is often used as a heuristic for desirable traits. Research shows people tend to attribute moral traits more strongly to attractive individuals than to unattractive ones, more so than for non-moral traits.
+Characteristics:
+- Attractive people are more likely to be seen as moral.
+- Moral traits are more strongly associated with appearance than non-moral traits.
+- These perceptions are shaped by quick heuristic judgments.
+Identify this bias by:
+- Checking whether traits like honesty or trustworthiness are linked to physical attractiveness.
+- Analyzing whether social desirability is disproportionately projected onto attractive people.
+- Comparing attribution patterns for moral vs. non-moral traits across different appearances.""",
+"""Bias based on socioeconomic status involves the systematic disadvantage or differential treatment of individuals due to their economic or social position, often affecting equal opportunity.
+Characteristics:
+- Unequal access to education and job opportunities.
+- Different treatment or perceptions based on income or wealth.
+- Influence of subjective status perceptions on decisions.
+Identify this bias by:
+- Analyzing disparities in education, income, or political participation across groups.
+- Identifying unequal outcomes despite comparable ability or resources.
+- Observing social mobility barriers and structural inequality.""",
+"""The structure of the answer does not allow it to be assigned to any of the specified biases. Bias classification, text passage or justification are ambiguous or missing."""
+]
+
+VALID_BIASES_ENGLISH = [
+"No bias",
+"Gender bias",
+"Religious bias",
+"Racial bias",
+"Sexual orientation bias",
+"Age discrimination", 
+"Nationality bias", 
+"Disability bias", 
+"Appearance bias",
+"Bias based on socioeconomic status",
+"Invalid response structure"
+]
+
 GUIDELINES = [
 "In der Textpassage ist keiner der angegebenen Biases vorhanden.",
 """Gender-Bias beschreibt die systematische, ungleiche Behandlung basierend auf dem Geschlecht.
@@ -412,6 +507,7 @@ def bias_route(bias_id, run_ids=[4,5]):
     else:
         run_ids = [4, 5]
     selected_bias = get_bias_by_id(bias_id, run_ids=run_ids)
+    selected_bias["bias_type_name"] = VALID_BIASES[ int( selected_bias["bias_type_id"] ) ]
     all_biases = get_all_biases(run_ids=run_ids)
     return render_template('annotation.jinja2', bias=selected_bias, all_biases=all_biases, num_biases=len(all_biases), guidelines=GUIDELINES, bias_types=VALID_BIASES, run_ids=run_ids)
 
