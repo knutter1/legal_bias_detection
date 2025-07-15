@@ -1,0 +1,142 @@
+You are given a court decision. Your task is to analyze the text for the following types of bias against or in favor of one of the parties or a class of persons and provide a clear justification for why a given passage demonstrates bias. Make sure to only check for bias by the current judge and not by cited individuals or other courts. 
+
+Use the definitions and criteria listed below:
+
+
+1. Gender Bias
+Gender bias refers to the systematic unequal treatment of individuals based on gender.
+
+Characteristics:
+- Structural bias: Use of grammatical constructions that reinforce stereotypical assumptions.
+- Contextual bias: Use of specific words or tone that reinforce gender-related roles or stereotypes.
+
+Stereotyping: Attributing traits or occupations based on socially constructed gender roles.
+Identify gender bias by:
+- Analyzing word associations (e.g., positive adjectives applied to women often relate to physical appearance).
+- Reviewing occupational terms for gender stereotypes.
+- Examining grammatical structures for gender-based generalizations.
+
+
+2. Religious Bias
+Religious bias refers to implicit attitudes and prejudices that often operate below conscious awareness and can hinder interfaith cooperation.
+
+Characteristics:
+- Rooted in social-psychological differences like status, scriptures, or transnational influences.
+- Group favoritism: the in-group is portrayed positively, the out-group negatively.
+- Divergent adherence to religious texts can amplify perceived theological differences.
+
+Identify this bias by:
+- Investigating implicit prejudices.
+- Analyzing differing reactions to interfaith messages depending on content and source.
+- Measuring delays in associating positive/negative attributes with specific religious groups.
+
+
+3. Racial Bias
+Racial bias can be either implicit (largely unconscious) or explicit (conscious). Both are widespread and have serious negative effects.
+
+Characteristics:
+- Reinforced by categorization, stereotyping, prejudice, and discrimination.
+- Can result in distorted judgments and discriminatory behavior, even without intent.
+
+Identify this bias by:
+- Presence of stereotypes in social or professional contexts.
+- Skewed judgments or behaviors under uncertainty or time pressure.
+- Differential treatment based on group characteristics.
+
+
+4. Sexual Orientation Bias
+Sexual orientation bias involves the conscious or unconscious disadvantage of individuals based on their sexual preference, especially in the workplace, education, or other social contexts.
+
+Characteristics:
+- Discrimination based on stereotypes or prejudice against sexual minorities.
+- Unequal treatment in employment, promotion, or other work-related decisions.
+- Denial of equal rights or access to services.
+
+Identify this bias by:
+- Comparing treatment of homosexual and heterosexual individuals in similar contexts.
+- Analyzing language or actions that reflect explicit or implicit prejudice.
+- Detecting disproportionate application of rules that disadvantage certain groups.
+
+
+5. Age Discrimination
+Age discrimination refers to unequal treatment or disadvantage based on age, unless justified by legitimate social policy or objective reasons. This includes both direct and indirect discrimination.
+
+Characteristics:
+- Defined age limits in policy settings without objective justification.
+- Relevance of proportionality checks when applying different age thresholds.
+
+Identify this bias by:
+- Disadvantaging groups due to rigid age limits unrelated to policy goals.
+- Age thresholds that restrict access to public benefits.
+- Examples such as unemployment insurance limited to certain age groups.
+
+
+6. Nationality Bias
+Nationality bias involves the systematic distortion of how countries or their citizens are portrayed, often through stereotypes or demeaning depictions.
+
+Characteristics:
+- Stereotypical or derogatory language about certain nationalities.
+- Overemphasis on military conflict or political instability in particular countries.
+
+Identify this bias by:
+- Focus on topics like violence, terrorism, or corruption disproportionately in relation to specific countries.
+
+
+7. Disability Bias
+Bias against people with disabilities refers to automatically triggered, unconscious attitudes that result in negative perceptions or treatment. These are often based on societal stereotypes.
+
+Characteristics:
+- Implicit negative preferences for non-disabled individuals.
+- Automatic associations of disability with negative concepts (e.g., "bad," "incompetent").
+- Tendency to view people with disabilities as childlike or less capable.
+
+Identify this bias by:
+- Analyzing associations between "disability" and negative terms.
+- Identifying subtle language implying lack of competence or autonomy.
+- Uncovering implicit assumptions in decisions that disadvantage disabled individuals.
+
+
+8. Appearance Bias
+Physical attractiveness is often used as a heuristic for desirable traits. Research shows people tend to attribute moral traits more strongly to attractive individuals than to unattractive ones, more so than for non-moral traits.
+
+Characteristics:
+- Attractive people are more likely to be seen as moral.
+- Moral traits are more strongly associated with appearance than non-moral traits.
+- These perceptions are shaped by quick heuristic judgments.
+
+Identify this bias by:
+- Checking whether traits like honesty or trustworthiness are linked to physical attractiveness.
+- Analyzing whether social desirability is disproportionately projected onto attractive people.
+- Comparing attribution patterns for moral vs. non-moral traits across different appearances.
+
+
+9. Socioeconomic Status Bias
+Bias based on socioeconomic status involves the systematic disadvantage or differential treatment of individuals due to their economic or social position, often affecting equal opportunity.
+
+Characteristics:
+- Unequal access to education and job opportunities.
+- Different treatment or perceptions based on income or wealth.
+- Influence of subjective status perceptions on decisions.
+
+Identify this bias by:
+- Analyzing disparities in education, income, or political participation across groups.
+- Identifying unequal outcomes despite comparable ability or resources.
+- Observing social mobility barriers and structural inequality.
+
+
+Here is the court decision:
+{text}
+
+END OF DECISION TEXT
+
+Output Format:
+If none of the above biases are found in the judgment, respond only with:
+“No bias” (without explanation).
+
+If one or more types of bias are found, respond for each one using this format in continuous prose (no bullet points):
+
+Identified Bias: [Insert the type of bias, e.g., "Gender Bias", "Religious Bias", etc.]  
+Text Passage: "[Insert the relevant quoted passage from the court decision]"  
+Justification: [Explain why this passage reflects the identified bias]
+
+Repeat this format for each identified bias.

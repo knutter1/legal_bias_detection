@@ -1,0 +1,199 @@
+{
+    "_id": "6761d0c6d5e079cb3f8ba595",
+    "id": 10202,
+    "abbreviation": "AG_RGAR_001_AGVE-2007-94_2007-03-30",
+    "court": "AG_Gerichte",
+    "rawTextFilePath": "C:\\\\SJP-Data\\\\Downloads_multithreaded\\AG_Gerichte\\AG_RGAR_001_AGVE-2007-94_2007-03-30.txt",
+    "jsonFilePath": "C:\\\\SJP-Data\\\\Downloads_multithreaded\\AG_Gerichte\\AG_RGAR_001_AGVE-2007-94_2007-03-30.json",
+    "Signatur": "AG_RGAR_001",
+    "Spider": "AG_Gerichte",
+    "Sprache": "de",
+    "Datum": "2007-03-30",
+    "PDF": {
+        "Datei": "AG_Gerichte/AG_RGAR_001_AGVE-2007-94_2007-03-30.pdf",
+        "URL": "https://agve.weblaw.ch/pdf/AGVE-2007-94.pdf",
+        "Checksum": "b89c1abf306e0b0e87e8a4b77cd3ea0b"
+    },
+    "HTML": {
+        "Datei": "AG_Gerichte/AG_RGAR_001_AGVE-2007-94_2007-03-30.html",
+        "URL": "http://agve.weblaw.ch/html//AGVE-2007-94.html",
+        "Checksum": "d7b938e7fbbb07ae8643b828944b0742"
+    },
+    "Num": [
+        "AGVE 2007 94"
+    ],
+    "Kopfzeile": [
+        {
+            "Sprachen": [
+                "de"
+            ],
+            "Text": "Aargau Rekursgericht im Ausländerrecht 30.03.2007 AGVE 2007 94"
+        },
+        {
+            "Sprachen": [
+                "fr"
+            ],
+            "Text": "Argovie Rekursgericht im Ausländerrecht 30.03.2007 AGVE 2007 94"
+        },
+        {
+            "Sprachen": [
+                "it"
+            ],
+            "Text": "Argovia Rekursgericht im Ausländerrecht 30.03.2007 AGVE 2007 94"
+        }
+    ],
+    "Meta": [
+        {
+            "Sprachen": [
+                "de"
+            ],
+            "Text": "Aargau Rekursgericht im Ausländerrecht "
+        },
+        {
+            "Sprachen": [
+                "fr"
+            ],
+            "Text": "Argovie Rekursgericht im Ausländerrecht "
+        },
+        {
+            "Sprachen": [
+                "it"
+            ],
+            "Text": "Argovia Rekursgericht im Ausländerrecht "
+        },
+        {
+            "Sprachen": [
+                "de",
+                "fr",
+                "it"
+            ],
+            "Text": "Beschwerden gegen Einspracheentscheide des Migrationsamts"
+        }
+    ],
+    "Abstract": [
+        {
+            "Sprachen": [
+                "de",
+                "fr",
+                "it"
+            ],
+            "Text": "94 Nichtverlängerung der Aufenthaltsbewilligung; Recht auf Achtung desFamilienlebens gemäss Art. 8 EMRKDie Nichtverlängerung der Aufenthaltsbewilligung stellt i.c. keinen Eingriff in das durch Art. 8 EMRK geschützte Familienleben dar, da es beiden Kindern zumutbar ist, ihrer Mutter ins Ausland zu folgen(Erw...."
+        }
+    ],
+    "ScrapyJob": "446973/34/416",
+    "Zeit UTC": "22.09.2021 04:33:11",
+    "Checksum": "c1769bfa1c05d626e7b19a92cdfd6a9c",
+    "language": "de",
+    "num_characters": 7901,
+    "selected_for_smaller_experiment": true,
+    "ollama_responses": [
+        {
+            "id": "9d22cf2d-ec59-4768-b9af-e0192a9a759c",
+            "model": "llama3.3",
+            "response": {
+                "biases": [
+                    {
+                        "id": 13,
+                        "summary": "Hier ist die Zusammenfassung des Urteils:\n\n- Parteien: Beschwerdeführerin (keine Beruf genannt), Ehemann der Beschwerdeführerin (keine Beruf genannt), Richter (kein Name und keine Hintergründe genannt)\n- Gericht: Rekursgericht im Ausländerrecht, 1 Vorinstanz (Migrationsamt), Entscheidungsdatum: 30. März 2007, Rechtsmittel: Ja (Berufung eingelegt, aber nicht erfolgreich), Rechtskräftigkeit: Ja\n- Sachverhalt: Nichtverlängerung der Aufenthaltsbewilligung, Art. 8 EMRK (Recht auf Achtung des Familienlebens), keine medizinischen Details oder Erwerbsstatus genannt\n- Rechtliches: Art. 8 EMRK (1 Gesetz), keine medizinischen Gutachten/Berichte genannt, Argumentationsquellen: Urteil des EGMR i.S. Gül gegen die Schweiz, BGE 2A.473/2006\n- Entscheidung: Gründe - Die Verweigerung der Aufenthaltsbewilligung stellt keinen Eingriff in das durch Art. 8 EMRK geschützte Familienleben dar, da es den Kindern zumutbar ist, ihrer Mutter ins Ausland zu folgen; Tenor - Die Nichtverlängerung der Aufenthaltsbewilligung hält vor Art. 8 EMRK stand (keine Strafe oder Entschädigung genannt)",
+                        "origin_url": "https://entscheidsuche.ch/docs/AG_Gerichte/AG_RGAR_001_AGVE-2007-94_2007-03-30.html",
+                        "run_id": 4,
+                        "bias_type_id": 6,
+                        "bias_type_name": "Nationalität-Bias",
+                        "textpassage": "\"Die Verweigerung der Aufenthaltsbewilligung der Beschwerdeführerin würde damit bedeuten, dass auf jeden Fall auch das jüngere der beiden Kinder ausreisen müsste, womit das Familienleben zwischen ihm und dem gesetzlichen Vater tangiert würde.\"",
+                        "reasoning": "Diese Passage zeigt einen Nationalität-Bias, da die Entscheidung über die Aufenthaltsbewilligung aufgrund der Nationalität der Beschwerdeführerin getroffen wird. Die Tatsache, dass die Kinder möglicherweise ausreisen müssten, wenn ihre Mutter keine Aufenthaltsbewilligung erhält, deutet darauf hin, dass die Entscheidung von stereotypischen Annahmen über die Fähigkeit von Menschen mit bestimmten Nationalitäten beeinflusst wird, ihr Familienleben im Ausland zu führen.",
+                        "annotations": [
+                            {
+                                "annotator": "Sabine Wehnert",
+                                "bias_type_id": 6,
+                                "comment": "",
+                                "bias_id": 13,
+                                "timestamp": 1740935370.4752674
+                            },
+                            {
+                                "annotator": "Tom Herzberg",
+                                "bias_type_id": 6,
+                                "comment": "",
+                                "bias_id": 13,
+                                "timestamp": 1746518833.4981663
+                            },
+                            {
+                                "annotator": "Kilian Lüders",
+                                "bias_type_id": 0,
+                                "comment": "",
+                                "bias_id": 13,
+                                "timestamp": 1747753660.8722727
+                            }
+                        ]
+                    },
+                    {
+                        "id": 14,
+                        "summary": "Hier ist die Zusammenfassung des Urteils:\n\n- Parteien: Beschwerdeführerin (keine Beruf genannt), Ehemann der Beschwerdeführerin (keine Beruf genannt), Richter (kein Name und keine Hintergründe genannt)\n- Gericht: Rekursgericht im Ausländerrecht, 1 Vorinstanz (Migrationsamt), Entscheidungsdatum: 30. März 2007, Rechtsmittel: Ja (Berufung eingelegt, aber nicht erfolgreich), Rechtskräftigkeit: Ja\n- Sachverhalt: Nichtverlängerung der Aufenthaltsbewilligung, Art. 8 EMRK (Recht auf Achtung des Familienlebens), keine medizinischen Details oder Erwerbsstatus genannt\n- Rechtliches: Art. 8 EMRK (1 Gesetz), keine medizinischen Gutachten/Berichte genannt, Argumentationsquellen: Urteil des EGMR i.S. Gül gegen die Schweiz, BGE 2A.473/2006\n- Entscheidung: Gründe - Die Verweigerung der Aufenthaltsbewilligung stellt keinen Eingriff in das durch Art. 8 EMRK geschützte Familienleben dar, da es den Kindern zumutbar ist, ihrer Mutter ins Ausland zu folgen; Tenor - Die Nichtverlängerung der Aufenthaltsbewilligung hält vor Art. 8 EMRK stand (keine Strafe oder Entschädigung genannt)",
+                        "origin_url": "https://entscheidsuche.ch/docs/AG_Gerichte/AG_RGAR_001_AGVE-2007-94_2007-03-30.html",
+                        "run_id": 4,
+                        "bias_type_id": 5,
+                        "bias_type_name": "Altersdiskriminierung",
+                        "textpassage": "\"Da der ältere Sohn der Beschwerdeführerin aufgrund seiner Niederlassungsbewilligung nicht verpflichtet ist, die Schweiz zu verlassen, erscheint klar, dass die Wegweisung der Beschwerdeführerin ihr durch Art. 8 Ziff. 1 EMRK geschütztes Familienleben tangieren könnte, sollte der ältere Sohn effektiv in der Schweiz bleiben wollen.\"",
+                        "reasoning": "Diese Passage zeigt eine Altersdiskriminierung, da die Entscheidung über die Aufenthaltsbewilligung aufgrund des Alters des Kindes getroffen wird. Die Tatsache, dass der ältere Sohn aufgrund seiner Niederlassungsbewilligung nicht verpflichtet ist, die Schweiz zu verlassen, während das jüngere Kind möglicherweise ausreisen müsste, deutet darauf hin, dass die Entscheidung von stereotypischen Annahmen über die Fähigkeit von Menschen verschiedenen Alters beeinflusst wird, ihr Familienleben zu führen.",
+                        "annotations": [
+                            {
+                                "annotator": "Sabine Wehnert",
+                                "bias_type_id": 0,
+                                "comment": "",
+                                "bias_id": 14,
+                                "timestamp": 1740935621.379587
+                            },
+                            {
+                                "annotator": "Tom Herzberg",
+                                "bias_type_id": 0,
+                                "comment": "",
+                                "bias_id": 14,
+                                "timestamp": 1741033298.3811197
+                            }
+                        ]
+                    },
+                    {
+                        "id": 15,
+                        "summary": "Hier ist die Zusammenfassung des Urteils:\n\n- Parteien: Beschwerdeführerin (keine Beruf genannt), Ehemann der Beschwerdeführerin (keine Beruf genannt), Richter (kein Name und keine Hintergründe genannt)\n- Gericht: Rekursgericht im Ausländerrecht, 1 Vorinstanz (Migrationsamt), Entscheidungsdatum: 30. März 2007, Rechtsmittel: Ja (Berufung eingelegt, aber nicht erfolgreich), Rechtskräftigkeit: Ja\n- Sachverhalt: Nichtverlängerung der Aufenthaltsbewilligung, Art. 8 EMRK (Recht auf Achtung des Familienlebens), keine medizinischen Details oder Erwerbsstatus genannt\n- Rechtliches: Art. 8 EMRK (1 Gesetz), keine medizinischen Gutachten/Berichte genannt, Argumentationsquellen: Urteil des EGMR i.S. Gül gegen die Schweiz, BGE 2A.473/2006\n- Entscheidung: Gründe - Die Verweigerung der Aufenthaltsbewilligung stellt keinen Eingriff in das durch Art. 8 EMRK geschützte Familienleben dar, da es den Kindern zumutbar ist, ihrer Mutter ins Ausland zu folgen; Tenor - Die Nichtverlängerung der Aufenthaltsbewilligung hält vor Art. 8 EMRK stand (keine Strafe oder Entschädigung genannt)",
+                        "origin_url": "https://entscheidsuche.ch/docs/AG_Gerichte/AG_RGAR_001_AGVE-2007-94_2007-03-30.html",
+                        "run_id": 4,
+                        "bias_type_id": 1,
+                        "bias_type_name": "Gender-Bias",
+                        "textpassage": "\"Der Ehemann der Beschwerdeführerin ist nach wie vor gesetzlicher Vater ihrer Kinder, liegt ein Familienleben im Sinne der Rechtsprechung des EGMR vor.\"",
+                        "reasoning": "Diese Passage zeigt einen Gender-Bias, da die Rolle des Vaters als gesetzlicher Vater hervorgehoben wird, während die Rolle der Mutter nicht explizit erwähnt wird. Dies deutet darauf hin, dass die Entscheidung von stereotypischen Annahmen über die Rolle von Männern und Frauen in der Familie beeinflusst wird.",
+                        "annotations": [
+                            {
+                                "annotator": "Sabine Wehnert",
+                                "bias_type_id": 0,
+                                "comment": "",
+                                "bias_id": 15,
+                                "timestamp": 1740935649.2747302
+                            },
+                            {
+                                "annotator": "Tom Herzberg",
+                                "bias_type_id": 0,
+                                "comment": "",
+                                "bias_id": 15,
+                                "timestamp": 1741033338.3591518
+                            }
+                        ]
+                    }
+                ]
+            },
+            "time_taken": 90.96,
+            "timestamp": 1737574139.0069704,
+            "run_id": 4
+        },
+        {
+            "id": "4e7134de-bd77-4065-8e36-660fa9f9e96e",
+            "model": "deepseek-r1:70b",
+            "response": {
+                "biases": null
+            },
+            "time_taken": 64.56,
+            "timestamp": 1737622674.7808843,
+            "run_id": 5
+        }
+    ],
+    "summary": "Hier ist die Zusammenfassung des Urteils:\n\n- Parteien: Beschwerdeführerin (keine Beruf genannt), Ehemann der Beschwerdeführerin (keine Beruf genannt), Richter (kein Name und keine Hintergründe genannt)\n- Gericht: Rekursgericht im Ausländerrecht, 1 Vorinstanz (Migrationsamt), Entscheidungsdatum: 30. März 2007, Rechtsmittel: Ja (Berufung eingelegt, aber nicht erfolgreich), Rechtskräftigkeit: Ja\n- Sachverhalt: Nichtverlängerung der Aufenthaltsbewilligung, Art. 8 EMRK (Recht auf Achtung des Familienlebens), keine medizinischen Details oder Erwerbsstatus genannt\n- Rechtliches: Art. 8 EMRK (1 Gesetz), keine medizinischen Gutachten/Berichte genannt, Argumentationsquellen: Urteil des EGMR i.S. Gül gegen die Schweiz, BGE 2A.473/2006\n- Entscheidung: Gründe - Die Verweigerung der Aufenthaltsbewilligung stellt keinen Eingriff in das durch Art. 8 EMRK geschützte Familienleben dar, da es den Kindern zumutbar ist, ihrer Mutter ins Ausland zu folgen; Tenor - Die Nichtverlängerung der Aufenthaltsbewilligung hält vor Art. 8 EMRK stand (keine Strafe oder Entschädigung genannt)",
+    "selected_for_annotation": true
+}
