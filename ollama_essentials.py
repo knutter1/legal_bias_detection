@@ -2,6 +2,11 @@ import requests
 import time
 import subprocess
 
+import json
+import requests
+import time
+from requests.exceptions import Timeout, ConnectionError, HTTPError
+
 
 # Ollama API-Endpunkt
 OLLAMA_URLS = ["http://localhost:11434/api/generate", "http://localhost:11435/api/generate"]
@@ -44,36 +49,57 @@ def is_gpu_memory_overloaded(threshold=0.9):
         return False
 
 
-def query_ollama(model_name, prompt, gpu_nr=0, num_ctx=65536):
+def query_ollama(
+        model_name: str,
+        prompt: str,
+        gpu_nr: int = 0,
+        num_ctx: int = 65_536,
+        max_retries: int = 5,
+        backoff_base: int = 2,
+):
     """
-    Sendet eine Anfrage an die Ollama API und gibt die Antwort zurück.
+    Fragt die Ollama-API bis zu `max_retries`-mal ab.
+    Bricht vorher ab, sobald eine gültige Antwort vorliegt.
     """
-    try:
-        # API-Anfrage-Daten
-        payload = {
-            "model": model_name,
-            "prompt": prompt,
-            "stream": False,  # False bedeutet: vollständige Antwort wird zurückgegeben
-            "options": {
-                "temperature": 0,  # Setzt die Temperatur auf 0 für deterministische Antworten
-                "seed": 0,
-                "num_ctx": num_ctx,
-                "max_tokens": 2048
-            }
-        }
 
-        # POST-Anfrage an die API
-        response = requests.post(OLLAMA_URLS[gpu_nr], json=payload)
+    payload = {
+        "model": model_name,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 0,
+            "seed": 0,
+            "num_ctx": num_ctx,
+            "max_tokens": 2048,
+        },
+    }
 
-        # Prüfe den Statuscode
-        if response.status_code == 200:
-            result = response.json()
-            return result.get("response", "Keine Antwort erhalten.")
-        else:
-            return f"Fehler: {response.status_code} - {response.text}"
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = requests.post(
+                OLLAMA_URLS[gpu_nr],
+                json=payload,
+                timeout=(10, 1200),        # (connect, read) Timeouts
+            )
+            resp.raise_for_status()        # wirft HTTPError bei 4xx/5xx
 
-    except Exception as e:
-        return f"Fehler beim Verbinden mit der Ollama API: {e}"
+            data = resp.json()             # wirft JSONDecodeError bei Ungültigem
+            answer = data.get("response", "")
+            if answer:                     # gültige, nicht-leere Antwort
+                return answer
+            raise ValueError("Leere Antwort erhalten")
+
+        except (Timeout, ConnectionError, HTTPError,
+                ValueError, json.JSONDecodeError) as err:
+
+            if attempt == max_retries:
+                return f"Fehler nach {max_retries} Versuchen: {err}"
+
+            wait = backoff_base ** (attempt - 1)   # 1 s, 2 s, 4 s, 8 s …
+            print(f"[{model_name}] Versuch {attempt}/{max_retries} fehlgeschlagen "
+                  f"({err}). Neuer Versuch in {wait}s …")
+            time.sleep(wait)
+
 
 def ask(model_name, prompt):
     # print(f"{model_name}:")

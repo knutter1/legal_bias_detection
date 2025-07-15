@@ -70,6 +70,7 @@ Here is the text of the judgment:
 
     try:
         response = query_ollama(model, summary_prompt, gpu_nr=gpu_nr, num_ctx=num_ctx)
+
         return response.strip()
     except Exception as e:
         logging.error(f"Fehler bei Summary-Generierung: {e}")

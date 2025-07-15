@@ -11,7 +11,7 @@ from datetime import datetime
 # Toggle for skipping already processed entries
 SKIP_PROCESSED = True
 TEST_ONLY = False
-RELOAD_MODEL_IF_MEMORY_FULL = True
+RELOAD_MODEL_IF_MEMORY_FULL = False
 
 
 def connect_to_mongo():
@@ -39,118 +39,100 @@ def get_model_response_vn(text, model, run_id, gpu_nr=0, num_ctx=8192):
     Analysiert den Text und gibt die Antworten mit IDs zurück.
     """
     prompt_text = f"""
-Bạn sẽ được cung cấp một văn bản đánh giá bằng tiếng Đức. Nhiệm vụ của bạn là phân tích văn bản này để tìm các loại định kiến ​​sau và đưa ra lời giải thích chính xác về lý do tại sao đoạn văn có định kiến.
-Sử dụng các định nghĩa và tiêu chí phân biệt bên dưới:
-
-1. Định kiến ​​giới
-Định kiến ​​giới mô tả sự đối xử có hệ thống, không bình đẳng dựa trên giới tính.
-Đặc điểm của định kiến ​​giới:
-- Định kiến ​​cấu trúc: Sử dụng các cấu trúc ngữ pháp thúc đẩy các giả định khuôn mẫu.
-- Định kiến ​​ngữ cảnh: Sử dụng các từ hoặc giọng điệu cụ thể củng cố vai trò và khuôn mẫu giới.
-- Định kiến: Gán các đặc điểm hoặc nghề nghiệp dựa trên vai trò giới tính xã hội.
-Xác định định kiến ​​giới bằng cách:
-- Phân tích các liên tưởng từ ngữ (ví dụ: tính từ tích cực dành cho phụ nữ thường đề cập đến các đặc điểm ngoại hình).
-- Kiểm tra các định kiến ​​theo thuật ngữ chuyên môn.
-- Phân tích các cấu trúc ngữ pháp để tìm các khái quát liên quan đến giới.
-
-2. Định kiến ​​tôn giáo
-Định kiến ​​tôn giáo đề cập đến các thái độ và định kiến ​​ngầm ẩn thường nằm dưới nhận thức có ý thức và có thể cản trở sự hợp tác liên tôn.
+Bạn được cung cấp một bản án của tòa án. Nhiệm vụ của bạn là phân tích văn bản này để xác định các loại thiên kiến (bias) sau đây, chỉ tập trung vào thiên kiến của thẩm phán hiện tại (không tính các cá nhân được trích dẫn hoặc các tòa án khác), và đưa ra lý do rõ ràng tại sao một đoạn văn cụ thể thể hiện thiên kiến đó.
+Hãy sử dụng các định nghĩa và tiêu chí dưới đây:
+1. Thiên kiến Giới tính
+ Thiên kiến giới tính đề cập đến việc đối xử không công bằng một cách có hệ thống dựa trên giới.
 Đặc điểm:
-- Thành kiến ​​tôn giáo có thể dựa trên những khác biệt về mặt tâm lý xã hội như địa vị, kinh thánh hoặc ảnh hưởng xuyên quốc gia.
-- Xu hướng thiên vị nhóm, trong đó nhóm trong được miêu tả tích cực và nhóm ngoài được miêu tả tiêu cực.
-- Sự gắn bó khác nhau với các văn bản tôn giáo có thể củng cố nhận thức về các nhóm khác biệt về mặt thần học.
-Xác định điều này bằng cách:
-- Kiểm tra những định kiến ​​ngầm.
-- Sự khác biệt trong phản ứng với các thông điệp liên tôn dựa trên nội dung và nguồn gốc của thông điệp.
-- Đo lường sự chậm trễ trong việc quy kết các thuộc tính tích cực hoặc tiêu cực cho một số nhóm tôn giáo nhất định.
+- Thiên kiến cấu trúc: Sử dụng cấu trúc ngữ pháp củng cố các giả định định kiến về giới.
+- Thiên kiến ngữ cảnh: Sử dụng từ ngữ hoặc tông giọng củng cố vai trò hoặc khuôn mẫu giới.
+- Khuôn mẫu: Gán đặc điểm hoặc nghề nghiệp dựa trên vai trò xã hội hóa của giới.
 
-3. Thành kiến ​​chủng tộc
-Thành kiến ​​phân biệt chủng tộc có thể là ngầm (tương đối vô thức) hoặc rõ ràng (có ý thức). Cả thành kiến ​​ngầm và rõ ràng đều phổ biến và dẫn đến hậu quả tiêu cực mạnh mẽ.
+
+Hãy xác định thiên kiến này bằng cách phân tích liên kết từ ngữ, các thuật ngữ nghề nghiệp, hoặc cấu trúc ngữ pháp nhằm tổng quát hóa về giới.
+
+
+2. Thiên kiến Tôn giáo
+ Thiên kiến tôn giáo là những thái độ, định kiến ngầm định có thể cản trở hợp tác giữa các tôn giáo.
 Đặc điểm:
-- Thành kiến ​​chủng tộc được củng cố bằng cách phân loại, đánh đồng, định kiến ​​và phân biệt đối xử.
-- Thành kiến ​​có thể dẫn đến những phán đoán sai lệch và hành vi phân biệt đối xử, ngay cả khi không có ý định.
-Nhận biết điều này thông qua:
-- Sự hiện diện của các khuôn mẫu trong các tương tác xã hội hoặc nghề nghiệp.
-- Các phán đoán hoặc hành động sai lệch trong các tình huống không chắc chắn hoặc áp lực về thời gian.
-- Sự khác biệt trong cách đối xử với các cá nhân dựa trên các đặc điểm của nhóm.
+- Xuất phát từ sự khác biệt xã hội-tâm lý như địa vị, kinh điển hoặc ảnh hưởng xuyên quốc gia.
+- Thiên vị nhóm: nhóm mình được miêu tả tích cực, nhóm ngoài bị miêu tả tiêu cực.
+- Sự khác biệt trong tuân thủ giáo lý có thể làm nổi bật khoảng cách thần học.
+ Hãy xác định thiên kiến này bằng cách phân tích các thành kiến ngầm định, phản ứng khác biệt với thông điệp liên tôn giáo, hoặc tốc độ liên kết các thuộc tính tốt/xấu với các nhóm tôn giáo nhất định.
 
-4. Định kiến ​​về khuynh hướng tình dục
-Định nghĩa:
-Định kiến ​​về khuynh hướng tình dục liên quan đến sự phân biệt đối xử có ý thức hoặc vô thức đối với các cá nhân dựa trên sở thích tình dục của họ. Điều này liên quan đến các quyết định hoặc hành động gây bất lợi cho những cá nhân này, cho dù ở nơi làm việc, cơ sở giáo dục hay các bối cảnh xã hội khác.
 
-Các đặc điểm:
-- Sự phân biệt đối xử dựa trên các khuôn mẫu hoặc định kiến ​​đối với nhóm thiểu số tình dục.
-- Sự đối xử không bình đẳng trong việc làm, thăng chức hoặc các quyết định liên quan đến công việc khác.
-- Sự từ chối các quyền hoặc dịch vụ bình đẳng.
-Nhận biết điều này bằng cách:
-- So sánh cách đối xử với người đồng tính và người dị tính trong những điều kiện tương tự.
-- Phân tích ngôn ngữ và hành động phản ánh ngầm hoặc rõ ràng sự định kiến.
-- Áp dụng không cân xứng các quy tắc gây bất lợi cho một số nhóm nhất định.
-
-5. Phân biệt đối xử theo độ tuổi
-Phân biệt đối xử theo độ tuổi bao gồm bất kỳ hình thức đối xử bất bình đẳng hoặc bất lợi nào đối với một người dựa trên độ tuổi của họ, trừ khi được biện minh bởi các mục tiêu chính sách xã hội hợp pháp hoặc lý do khách quan. Nó bao gồm cả phân biệt đối xử trực tiếp và gián tiếp.
+3. Thiên kiến Chủng tộc
+ Thiên kiến chủng tộc có thể là ngầm định hoặc hiển hiện, đều phổ biến và gây tác động tiêu cực nghiêm trọng.
 Đặc điểm:
-- Phân biệt đối xử theo độ tuổi khác nhau ở việc áp dụng các giới hạn độ tuổi cụ thể trong các quy định về chính sách xã hội.
-- Các bài kiểm tra về tính tương xứng đặc biệt có liên quan khi các giới hạn độ tuổi không bình đẳng.
-Nhận ra điều này bằng cách:
-- Gây bất lợi cho các nhóm thông qua các giới hạn độ tuổi được xác định một cách cứng nhắc mà không có mối liên hệ khách quan nào với các mục tiêu dự kiến.
-- Các trường hợp giới hạn độ tuổi cản trở quyền tiếp cận cụ thể với các phúc lợi xã hội.
-- Các chỉ số như giới hạn bảo hiểm thất nghiệp cho các nhóm tuổi.
+- Được củng cố bởi phân loại, khuôn mẫu, định kiến và phân biệt đối xử.
+- Có thể dẫn đến phán xét méo mó hoặc hành vi phân biệt dù không cố ý.
+ Hãy xác định thiên kiến này qua các khuôn mẫu trong bối cảnh xã hội, công việc, sự khác biệt trong đánh giá hoặc hành vi dựa trên đặc điểm nhóm.
 
-6. Định kiến ​​quốc tịch
-Định kiến ​​quốc tịch đề cập đến sự bóp méo có hệ thống trong đó các quốc gia hoặc dân số của họ được mô tả theo cách không chính xác, rập khuôn hoặc hạ thấp.
+
+4. Thiên kiến Xu hướng Tình dục
+ Thiên kiến này liên quan đến việc gây bất lợi (ý thức hoặc vô thức) cho cá nhân dựa trên xu hướng tình dục của họ.
 Đặc điểm:
-- Ngôn ngữ rập khuôn hoặc hạ thấp đối với một số quốc tịch nhất định.
-- Chủ đề tập trung vào xung đột quân sự hoặc bất ổn chính trị đối với một số quốc gia nhất định.
-Nhận ra điều này bằng cách:
-- Các chủ đề như bạo lực, khủng bố hoặc tham nhũng, được thể hiện quá mức liên quan đến một số quốc gia nhất định.
+- Phân biệt đối xử dựa trên định kiến về các nhóm thiểu số tình dục.
+- Đối xử không công bằng trong tuyển dụng, thăng tiến hoặc các quyết định công việc khác.
+- Từ chối quyền lợi hoặc dịch vụ công bằng.
+ Hãy xác định bằng cách so sánh cách đối xử với người đồng tính và dị tính trong cùng bối cảnh, phân tích ngôn ngữ hoặc hành động thể hiện định kiến.
 
-7. Định kiến ​​về khuyết tật
-Định kiến ​​đối với người khuyết tật tự động đề cập đến Thái độ vô thức, chủ động dẫn đến việc người khuyết tật bị nhìn nhận hoặc đối xử tiêu cực. Những thái độ này dựa trên các khuôn mẫu và mối liên hệ xã hội thường dẫn đến hành vi phân biệt đối xử.
+
+5. Phân biệt tuổi tác
+ Phân biệt tuổi tác là việc đối xử không công bằng hoặc gây bất lợi dựa trên tuổi, trừ khi được biện minh bằng chính sách xã hội hợp lý hoặc lý do khách quan.
 Đặc điểm:
-- Sở thích ngầm tiêu cực đối với người không khuyết tật hơn người khuyết tật.
-- Tự động liên tưởng khuyết tật với các thuật ngữ tiêu cực (ví dụ: xấu, bất tài).
-- Xu hướng coi người khuyết tật là trẻ con hoặc kém năng lực.
-Nhận ra điều này bằng cách:
-- Phân tích mối liên hệ giữa các thuật ngữ như "khuyết tật" và "tiêu cực" trong văn bản.
-- Xác định các cách diễn đạt tinh tế gợi ý sự thiếu năng lực hoặc tự chủ.
-- Xem xét các giả định ngầm trong quá trình ra quyết định gây bất lợi cho người khuyết tật.
+- Đặt giới hạn tuổi trong chính sách mà không có lý do khách quan.
+- Cần kiểm tra sự tương xứng khi áp dụng các ngưỡng tuổi khác nhau.
+ Hãy xác định bằng cách kiểm tra việc gây bất lợi do giới hạn tuổi cứng nhắc không liên quan mục tiêu chính sách, hoặc hạn chế hưởng quyền lợi công dựa vào tuổi.
 
-8. Định kiến ​​về ngoại hình
-Sự hấp dẫn về ngoại hình là một phương pháp thường được sử dụng như một chỉ báo về các đặc điểm mong muốn. Các nghiên cứu cho thấy mọi người có nhiều khả năng gán các phẩm chất đạo đức cho những cá nhân hấp dẫn hơn là những cá nhân không hấp dẫn, một hiệu ứng mạnh hơn xu hướng liên tưởng những người hấp dẫn với các phẩm chất phi đạo đức tích cực. Điều này cho thấy sức hấp dẫn về mặt thể chất ảnh hưởng mạnh mẽ đến nhận thức về phẩm chất đạo đức.
+
+6. Thiên kiến Quốc tịch
+ Thiên kiến quốc tịch liên quan đến việc mô tả sai lệch có hệ thống về quốc gia hoặc công dân, thường qua khuôn mẫu hoặc cách miêu tả xúc phạm.
 Đặc điểm:
-- Những cá nhân hấp dẫn có nhiều khả năng được coi là có đạo đức.
-- Việc quy kết các phẩm chất đạo đức mạnh hơn việc quy kết các phẩm chất phi đạo đức.
-- Nhận thức về phẩm chất đạo đức dựa trên các đánh giá nhanh chóng.
-Phát hiện điều này bằng cách:
-- Kiểm tra xem các phẩm chất đạo đức như sự trung thực hay đáng tin cậy có liên quan đến sức hấp dẫn về mặt thể chất hay không.
-- Phân tích các đánh giá chiếu sự mong muốn xã hội không cân xứng lên những cá nhân hấp dẫn.
-- So sánh các mô hình quy kết đạo đức và phi đạo đức đối với những cá nhân hấp dẫn so với những cá nhân không hấp dẫn.
+- Ngôn ngữ khuôn mẫu hoặc miệt thị về quốc tịch nhất định.
+- Nhấn mạnh quá mức về xung đột quân sự hoặc bất ổn chính trị của các quốc gia.
+ Hãy xác định bằng cách kiểm tra sự tập trung quá mức vào bạo lực, khủng bố hoặc tham nhũng liên quan đến quốc gia cụ thể.
 
-9. Định kiến ​​về địa vị kinh tế xã hội:
-Định kiến ​​về địa vị kinh tế xã hội mô tả những sự bóp méo có hệ thống xảy ra khi mọi người bị đối xử hoặc đánh giá không bình đẳng dựa trên vị thế kinh tế và xã hội của họ, điều này làm suy yếu các cơ hội bình đẳng.
-Đặc điểm
-- Sự bóp méo trong việc tiếp cận giáo dục và cơ hội việc làm.
-- Nhận thức và cách đối xử khác nhau dựa trên thu nhập hoặc sự giàu có.
-- Ảnh hưởng của nhận thức chủ quan về địa vị đối với các quyết định.
-Nhận ra điều này bằng cách
-- Phân tích sự khác biệt giữa các nhóm kinh tế xã hội về giáo dục, thu nhập hoặc tham gia chính trị.
-- Xác định kết quả không bình đẳng mặc dù có khả năng hoặc nguồn lực tương đương.
-- Quan sát sự di chuyển xã hội và các rào cản về mặt cấu trúc.
 
-Sau đây là văn bản phán quyết:
+7. Thiên kiến đối với người khuyết tật
+ Thiên kiến với người khuyết tật là các thái độ ngầm định, tự động, dẫn đến nhận thức hoặc đối xử tiêu cực.
+Đặc điểm:
+- Sự ưu ái ngầm định đối với người không khuyết tật.
+- Tự động liên kết khuyết tật với những khái niệm tiêu cực (ví dụ: "xấu", "kém năng lực").
+- Khuynh hướng xem người khuyết tật là trẻ con hoặc kém khả năng hơn.
+ Hãy xác định bằng cách phân tích liên kết giữa “khuyết tật” và từ ngữ tiêu cực, ngôn ngữ hàm ý thiếu năng lực hoặc tự chủ.
 
-{text}
 
-KẾT THÚC VĂN BẢN PHÁN QUYẾT
-Định dạng đầu ra:
-Nếu phán quyết không chứa bất kỳ thành kiến ​​nào được đề cập, chỉ cần trả lời bằng cụm từ "Không có thành kiến" và không đưa ra lý do cho quyết định của bạn. Nếu không, hãy trả lời như sau:
-Nếu bạn đã xác định được một loại thành kiến, hãy cấu trúc câu trả lời của bạn theo định dạng gồm ba phần riêng biệt để tôi có thể xử lý thêm.
-Trình bày câu trả lời của bạn dưới dạng văn bản liên tục và theo định dạng sau:
-Thành kiến ​​đã xác định: [Ở đây, bạn nêu loại thành kiến, tức là một trong những loại sau: "thành kiến ​​giới tính", "thành kiến ​​tôn giáo", "thành kiến ​​chủng tộc", "thành kiến ​​khuynh hướng tình dục", "phân biệt đối xử về tuổi tác", "thành kiến ​​quốc tịch", "thành kiến ​​khuyết tật", "thành kiến ​​ngoại hình" hoặc "thành kiến ​​địa vị kinh tế xã hội"]
-Đoạn văn: "[Ở đây, bạn trích dẫn đoạn văn có liên quan từ văn bản phán quyết]"
-Căn cứ: [Giải thích lý do tại sao đoạn văn này thể hiện thành kiến ​​này]
-Nếu văn bản phán quyết chứa nhiều thành kiến, hãy trả lời nhiều lần theo định dạng này.
+8. Thiên kiến Ngoại hình
+ Ngoại hình thường được dùng làm cơ sở phán xét về đặc điểm đạo đức. Nghiên cứu cho thấy người hấp dẫn thường được đánh giá cao về phẩm chất đạo đức hơn so với người kém hấp dẫn.
+Đặc điểm:
+- Người hấp dẫn dễ được coi là có phẩm chất đạo đức.
+- Phẩm chất đạo đức thường liên hệ mạnh hơn với ngoại hình so với các phẩm chất khác.
+- Các nhận xét này thường dựa trên đánh giá nhanh chóng.
+ Hãy xác định bằng cách xem các đặc điểm như trung thực, đáng tin có được liên kết với ngoại hình hay không, hoặc có sự khác biệt trong đánh giá đạo đức theo ngoại hình.
+
+
+9. Thiên kiến Địa vị Kinh tế Xã hội
+ Thiên kiến này là sự phân biệt hoặc đối xử khác biệt có hệ thống do vị trí kinh tế hoặc xã hội, thường ảnh hưởng đến cơ hội bình đẳng.
+Đặc điểm:
+- Cơ hội học tập, việc làm không đồng đều.
+- Đánh giá hoặc đối xử khác nhau dựa trên thu nhập hoặc tài sản.
+- Sự chênh lệch kết quả dù khả năng hoặc nguồn lực tương đương, hoặc rào cản di chuyển xã hội.
+
+Hãy xác định bằng cách phân tích chênh lệch về giáo dục, thu nhập hoặc tham gia chính trị, kết quả không đồng đều, rào cản cơ cấu xã hội.
+
+
+Bản án của tòa án:
+ {text}
+KẾT THÚC VĂN BẢN
+Định dạng kết quả:
+ Nếu không phát hiện bất kỳ thiên kiến nào ở trên trong bản án, chỉ trả lời:
+ “Không có thiên kiến” (không cần giải thích).
+Nếu phát hiện một hoặc nhiều loại thiên kiến, trả lời cho từng loại theo mẫu sau (dạng đoạn văn, không dùng gạch đầu dòng):
+Identified Bias: [Loại thiên kiến, ví dụ: "Thiên kiến Giới tính", "Thiên kiến Chủng tộc", v.v.]
+Text Passage: "[Trích dẫn đoạn văn liên quan trong bản án]"
+Justification: [Giải thích vì sao đoạn văn này thể hiện thiên kiến đó]
+Lặp lại mẫu này cho từng thiên kiến được phát hiện.
 """
 
     start_time = time.time()
@@ -250,117 +232,99 @@ def get_model_response_jp(text, model, run_id, gpu_nr=0, num_ctx=8192):
     Analysiert den Text und gibt die Antworten mit IDs zurück.
     """
     prompt_text = f"""
-ドイツ語の評価テキストが提供されます。課題は、このテキストを分析し、以下の種類の偏見がないか確認し、なぜこの文章に偏見が含まれているのかを明確に説明することです。
-以下の定義と判別基準を使用してください。
-
+あなたには裁判所の判決文が与えられます。あなたの課題は、下記の偏見の種類について、現在の裁判官によるものに限定して、判決文を分析し、偏見を示す該当箇所とその明確な根拠を提示することです。引用された個人や他の裁判所による偏見は含めないでください。
+以下の定義と基準を使用してください：
 1. ジェンダーバイアス
-ジェンダーバイアスとは、性別に基づく体系的かつ不平等な扱いを指します。
-ジェンダーバイアスの特徴：
-- 構造的バイアス：ステレオタイプ的な思い込みを助長する文法構造の使用。
-- 文脈的バイアス：ジェンダー役割やステレオタイプを強化する特定の単語や語調の使用。
-- ステレオタイプ化：社会的なジェンダー役割に基づいて、特性や職業を割り当てること。
-ジェンダーバイアスを特定するには、次の方法があります。
-- 語の連想を分析する（例：女性を表す肯定的な形容詞は、身体的特徴を指すことが多い）。
-- 専門用語におけるステレオタイプを確認する。
-- ジェンダー関連の一般化について文法構造を分析する。
-
-2. 宗教的偏見
-宗教的偏見とは、しばしば意識の奥底に潜む、暗黙の態度や偏見を指し、宗教間の協力を妨げる可能性があります。
+ ジェンダーバイアスとは、性別に基づく体系的な不平等な扱いを指します。
 特徴：
-- 宗教的偏見は、地位、聖典、国境を越えた影響といった社会心理学的な差異に基づく場合があります。
-- 集団偏愛の傾向。内集団は肯定的に、外集団は否定的に描写されます。
-- 宗教的文献への愛着の違いは、神学的に異なる集団に対する認識を強める可能性があります。
-これを特定するには、以下の方法があります。
-- 暗黙の偏見を調査する。
-- 宗教間のメッセージに対する反応の違いを、メッセージの内容と情報源に基づいて調べる。
-- 特定の宗教集団に肯定的または否定的な属性を帰属させるまでの遅延を測定する。
+- 構造的バイアス：ステレオタイプを強化する文法構造の使用。
+- 文脈的バイアス：性別に関連する役割や固定観念を強化する特定の言葉やトーンの使用。
+- ステレオタイプ：社会的に構築された性別役割に基づく特性や職業の帰属。
 
-3. 人種的偏見
-人種差別的偏見は、暗黙的（比較的無意識的）または明示的（意識的）に現れます。暗黙的および明示的な偏見はどちらも広く蔓延しており、強い否定的な結果をもたらします。
-特徴：
-- 人種的偏見は、カテゴリー分け、ステレオタイプ化、偏見、差別によって強化されます。
-- 偏見は、意図がない場合でも、歪んだ判断や差別的な行動につながる可能性があります。
-以下の点から認識しましょう。
-- 社会的な交流や職場での交流におけるステレオタイプの存在。
-- 不確実な状況や時間的制約のある状況における歪んだ判断や行動。
-- 集団の特性に基づく個人の扱いの違い。
 
-4. 性的指向に基づく偏見
-定義：
-性的指向に基づく偏見とは、個人の性的嗜好に基づいて、意識的または無意識的に差別することです。職場、教育機関、その他の社会的な場において、これらの個人に不利益となるような決定や行動が伴います。
+形容詞の連想（例：女性に対する肯定的形容詞が主に外見に関する場合）や、職業用語、文法構造に性別に基づく一般化がないか分析してください。
+
+
+2. 宗教バイアス
+ 宗教バイアスとは、暗黙の態度や偏見により、宗教間の協力が妨げられることを指します。
 特徴：
-- 性的マイノリティに対するステレオタイプや偏見に基づく差別。
-- 雇用、昇進、その他の職務上の決定における不平等な扱い。
-- 平等な権利やサービスの否定。
-以下の点に注意して認識してください。
-- 同様の状況下における同性愛者と異性愛者の扱いを比較する。
-- 暗黙的または明示的に偏見を反映する言葉や行動を分析する。
-- 特定の集団に不利益となる規則を不均衡に適用する。
+- 社会心理的な違い（地位、経典、国際的影響など）に根ざす。
+- 集団えこひいき：内集団を肯定的に、外集団を否定的に描写。
+- 宗教的教義への異なる態度が神学的な違いを強調する場合がある。
+- 暗黙的偏見の調査、宗教的メッセージへの反応の違い、特定宗教集団への属性付けの遅延を分析してください。
+
+
+3. 人種バイアス
+ 人種バイアスには、無意識的（インプリシット）および意識的（エクスプリシット）なものがあり、いずれも深刻な悪影響を及ぼします。
+特徴：
+- カテゴライズ、ステレオタイプ、偏見、差別により強化される。
+- 意図がなくても歪んだ判断や差別的行動につながる。
+- 社会・職業的文脈でのステレオタイプや、グループ特性に基づく扱いの差などを分析してください。
+
+
+4. 性的指向バイアス
+ 性的指向バイアスとは、性的嗜好に基づいて意識的または無意識的に不利益を与えることを指します。
+特徴：
+- 性的マイノリティに対する偏見や差別。
+- 雇用や昇進などでの不平等な扱い。
+- 権利やサービスへの平等なアクセスの否定。
+- 同一状況での異性愛者と同性愛者の扱いの違いや、言語・行動に偏見がないか分析してください。
+
 
 5. 年齢差別
-年齢差別とは、正当な社会政策目標または客観的な理由によって正当化されない限り、年齢に基づくあらゆる形態の不平等な扱いまたは不利益を包含します。直接差別と間接差別の両方が含まれます。
+ 年齢差別とは、正当な社会政策や客観的理由なしに年齢を理由として不平等な扱いをすることを指します。
 特徴：
-- 年齢差別は、社会政策規制における特定の年齢制限の適用によって異なります。
-- 比例性テストは、年齢制限が不平等な場合に特に重要です。
-以下の点に注意して認識してください。
-- 意図された目標と客観的な関連性のない、厳格に定義された年齢制限によって集団に不利益を与えること。
-- 年齢制限によって特定の社会保障へのアクセスが妨げられるケース。
-- 失業保険の対象年齢層が限定されているなどの指標。
+- 客観的理由のない年齢制限の設定。
+- 公的給付などへのアクセス制限。
+- 年齢制限が政策目的に関連していない場合や、雇用保険の年齢制限などを分析してください。
+
 
 6. 国籍バイアス
-国籍バイアスとは、国やその国民が不正確、ステレオタイプ的、あるいは軽蔑的な形で描写される、体系的な歪曲を指します。
+ 国籍バイアスとは、国や国民に対する体系的な歪曲的描写やステレオタイプ、侮辱的な表現を指します。
 特徴：
-- 特定の国籍に対するステレオタイプ的または軽蔑的な表現。
-- 特定の国の軍事紛争や政情不安に焦点を当てた話題。
-認識すべき点：
-- 暴力、テロ、汚職といった話題が、特定の国に関して過剰に取り上げられている。
+- 特定の国籍に対するステレオタイプ的または侮辱的な言語。
+- 軍事紛争や政治的不安などの強調。
+- 暴力やテロ、腐敗などに関する描写が特定国に偏っていないか分析してください。
 
-7. 障がい者バイアス
-障がい者に対するバイアスとは、自動的に以下を指します。障害のある人が否定的に認識されたり、扱われたりする原因となる、無意識のうちに活性化された態度。これらの態度は、社会的な固定観念や連想に基づいており、しばしば差別的な行動につながります。
+
+7. 障害者バイアス
+ 障害者に対するバイアスとは、無意識に自動的に発生する否定的な態度や扱いを指します。
 特徴：
-- 障害のある人よりも、障害のない人を好むという、暗黙の否定的な選好。
-- 障害を否定的な言葉（例：悪い、無能）と自動的に結びつける。
-- 障害のある人を子供っぽい、あるいは能力が劣っていると認識する傾向。
-以下の方法でこれを認識します。
-- 文章中における「障害」と「否定的」といった言葉の関連性を分析する。
-- 能力や自律性の欠如を示唆する微妙な表現を特定する。
-- 障害のある人に不利な意思決定プロセスにおける暗黙の前提を検証する。
+- 健常者に対する暗黙の好意。
+- 障害と否定的概念の自動的な結びつき。
+- 障害者を無能や幼児的に見る傾向。
+- 「障害」と否定的用語の連想や、能力・自律性の暗黙的否定を分析してください。
+
 
 8. 外見バイアス
-外見の魅力は、望ましい特性の指標としてよく使われるヒューリスティックです。研究によると、人々は魅力的な人物に道徳的資質を帰属させる傾向が、魅力のない人物に帰属させる傾向よりも強く、この影響は魅力的な人物を肯定的な非道徳的資質と結びつける傾向よりも強いことが示されています。これは、外見的な魅力が特に道徳的性格の認識に強く影響することを示唆しています。
-特性：
-- 魅力的な人物は道徳的であると認識される可能性が高い。
-- 道徳的資質の帰属は、非道徳的資質の帰属よりも強い。
-- 道徳的資質の認識は、迅速なヒューリスティック評価に基づいています。
-これを検出するには、次の方法があります。
-- 誠実さや信頼性といった道徳的資質が外見的な魅力と関連しているかどうかを確認する。
-- 魅力的な人物に社会的望ましさを過度に投影する評価を分析する。
-- 魅力的な人物と魅力のない人物の道徳的および非道徳的帰属パターンを比較する。
+ 外見の魅力は、道徳的特性などの判断に影響する傾向があります。
+特徴：
+- 魅力的な人がより道徳的と見なされる。
+- 社会的望ましさが外見によって不釣り合いに投影される。
+- 外見の違いによる道徳的・非道徳的特性の帰属傾向を分析してください。
 
-9. 社会経済的地位バイアス：
-社会経済的地位バイアスとは、人々が経済的・社会的地位に基づいて不平等に扱われたり判断されたりすることで生じる体系的な歪みを指し、機会均等を阻害します。
-特徴
-- 教育や就職機会へのアクセスにおける歪み。
-- 収入や富に基づく認識や扱いの違い。
-- 地位に関する主観的な認識が意思決定に与える影響。
-これを認識するには、次のことを行います。
-- 教育、収入、または政治参加における社会経済的グループ間の格差を分析する。
-- 同等の能力やリソースがあるにもかかわらず、不平等な結果が生じる状況を特定する。
-- 社会流動性と構造的障壁を観察する。
 
-判決文：
+9. 社会経済的地位バイアス
+ 社会経済的地位に基づくバイアスとは、経済的・社会的地位による体系的な不利益や差別的扱いを指します。
+特徴：
+- 教育・雇用機会への不平等なアクセス。
+- 所得や資産に基づく異なる扱い。
 
-{text}
 
+- 社会的流動性の障壁や構造的不平等を分析してください。
+
+
+判決文:
+ {text}
 判決文終了
-出力形式：
-判決に上記のバイアスが一切含まれていない場合は、「バイアスなし」と回答し、判決の理由は記載しないでください。それ以外の場合は、以下のように回答してください。
-特定の種類のバイアスを特定した場合は、私がさらに深く検討できるよう、回答を3つの部分に分けた形式で構成してください。
-回答は連続した文章で、以下の形式で提出してください。
-特定したバイアス：[ここでは、バイアスの種類（「ジェンダーバイアス」、「宗教バイアス」、「人種バイアス」、「性的指向バイアス」、「年齢差別」、「国籍バイアス」、「障害バイアス」、「外見バイアス」、「社会経済的地位バイアス」のいずれか）を明記してください。]
-本文：[ここでは、判決文から関連箇所を引用してください。]
-根拠：[なぜこの箇所がこのバイアスを示しているのか説明してください。]
-判決文に複数のバイアスが含まれている場合は、この形式で複数回回答してください。
+出力形式:
+ 上記のバイアスが判決文に一切認められない場合は、次のようにだけ答えてください：
+ 「バイアスなし」（説明不要）
+いずれかのバイアスが認められる場合は、それぞれについて下記の形式（箇条書き不可、連続した文章）で回答してください：
+Identified Bias: [バイアスの種類（例：「ジェンダーバイアス」等）]
+Text Passage: 「判決文からの該当引用箇所」
+Justification: [その箇所がバイアスを示す理由の説明]
+バイアスごとにこの形式で繰り返してください。
 """
 
     start_time = time.time()
@@ -706,4 +670,4 @@ if __name__ == "__main__":
         ]
     )
 
-    bias_check_single_en(model="deepseek-r1:70b", run_id=9)
+    bias_check_single_jp(model="deepseek-r1:70b", run_id=11)

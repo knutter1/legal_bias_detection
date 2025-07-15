@@ -126,8 +126,10 @@
 
         <div class="d-flex gap-3 p-3 border-bottom align-items-center">
             <div class="d-flex flex-column ms-3" style="font-size: 0.8rem;">
-                <div class="mb-1">Show bias cases from:</div>
-                <div class="d-flex flex-column gap-0">
+
+                <!-- not visible! -->
+                <div class="mb-1 d-none">Show bias cases from:</div>
+                <div class="d-flex flex-column gap-0 d-none">
                     <div class="form-check" title="Show bias results from Llama3.3">
                         <input class="form-check-input" type="checkbox" id="llama-checkbox" value="4" {% if run_ids is defined and (4 in run_ids) %}checked{% endif %}>
                         <label class="form-check-label" for="llama-checkbox">
@@ -141,6 +143,7 @@
                         </label>
                     </div>
                 </div>
+
             </div>
 
             <div class="case-list">
@@ -152,11 +155,18 @@
             </div>
 
             <select class="form-select" id="annotator-select" style="width: 15%;" title="Select annotator">
+                <option>Ali Ahsan</option>
+		        <option>Charvi Medooru</option>
+                <option>Haihua Chen</option>
+                <option>Hiroaki Yamada</option>
+                <option>Ken Satoh</option>
                 <option>Kilian Lüders</option>
+                <option>Le Ngoc Cam</option>
+                <option>Nguyen Thanh</option>
                 <option>Sabine Wehnert</option>
-                <option>Tom Herzberg</option>
                 <option>Serene Wang</option>
-                <option>Charvi Medooru</option>
+                <option>Tom Herzberg</option>
+                <option>Yang Zhang</option>
             </select>
         </div>
 
@@ -236,9 +246,6 @@
         const bias = {{ bias | tojson }};
         const currentBiasId = bias.id;
 
-        // hardcoded cases for Kilian to work on
-        const kilianCases = [13, 24, 25, 29, 33, 36, 41, 48, 59, 73, 77, 113, 119, 125, 162, 170, 230, 242, 244, 245, 246, 406, 453, 454, 455, 464, 466, 467, 468, 501, 502, 503, 531, 565, 566, 577, 592, 618, 643, 645, 649, 651, 656, 685, 687, 855, 856, 862, 863, 879, 893, 921, 926, 946, 955, 962, 980, 1010, 1034, 1044, 1045, 1047, 1062, 1063, 1064, 1077, 1084, 1085, 1086, 1089, 1104, 1237, 1239, 1281, 1296, 1346, 1368, 1420, 1425, 1521];
-
         // Remove case list and navigation code
         // # ...existing code removed...
 
@@ -271,11 +278,6 @@
 
             const currentAnnotator = document.getElementById('annotator-select').value;
 
-            // Kilian Lüders only sees his cases
-            if (currentAnnotator === "Kilian Lüders") {
-                onlyShowKiliansCases();
-                console.log("Kilian's cases are being displayed.");
-            }
 
             // Load annotation if available (adjust as needed)
             const annotation = bias.annotations.find(a => a.annotator === currentAnnotator);
@@ -300,17 +302,6 @@
 
             // Update guidelines section if necessary
             // # ...existing code updated accordingly...
-        }
-
-        // Function to only show Kilian's cases
-        function onlyShowKiliansCases() {
-            const caseList = document.querySelector('.case-list');
-            const caseItems = caseList.querySelectorAll('.case-item');
-            caseItems.forEach(item => {
-                if (!kilianCases.includes(parseInt(item.textContent))) {
-                    item.style.display = 'none'; // Hide items not in Kilian's cases
-                }
-            });
         }
 
         // Function to navigate to the previous case
@@ -341,11 +332,19 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
-            // restore annotator and case-list scroll position from localStorage if available
-            const storedAnnotator = localStorage.getItem('selectedAnnotator');
-            if (storedAnnotator) {
-                document.getElementById('annotator-select').value = storedAnnotator;
+            const select = document.getElementById('annotator-select');
+
+            // 1) Default auf Tom Herzberg setzen
+            if (!localStorage.getItem('selectedAnnotator')) {
+                select.value = 'Tom Herzberg';
             }
+
+            // 2) Dann localStorage-Wert (falls vorhanden) übernehmen
+            const stored = localStorage.getItem('selectedAnnotator');
+            if (stored) {
+                select.value = stored;
+            }
+
 
             initUI();
 
@@ -354,13 +353,13 @@
 
             const caseList = document.querySelector('.case-list');
             const storedScroll = localStorage.getItem('caseListScroll');
-            if (storedScroll && currentAnnotator !== "Kilian Lüders") {
+            if (storedScroll) {
                 caseList.scrollLeft = parseInt(storedScroll, 10);
             }
 
             // Center the active case in the case-list
             const activeCase = document.querySelector('.case-item.active');
-            if (activeCase && currentAnnotator !== "Kilian Lüders") {
+            if (activeCase) {
                 const containerWidth = caseList.clientWidth;
                 // Calculate scrollLeft so that activeCase is centered
                 const scrollLeft = activeCase.offsetLeft - (containerWidth / 2) + (activeCase.offsetWidth / 2);
@@ -403,15 +402,6 @@
 
             llamaCheckbox.addEventListener('click', updateRunIds);
             deepseekCheckbox.addEventListener('click', updateRunIds);
-
-            if (currentAnnotator === "Kilian Lüders" && currentBiasId === 1) {
-                // edge case: go to first case in Kilian's list
-                const firstKilianCase = kilianCases[0];
-                const firstKilianCaseItem = document.getElementById('case-item-' + firstKilianCase);
-                if (firstKilianCaseItem) {
-                    firstKilianCaseItem.click();
-                }
-            }
 
         });
 

@@ -87,11 +87,11 @@ VALID_BIASES_ENGLISH = [
 "Religious bias",
 "Racial bias",
 "Sexual orientation bias",
-"Age discrimination", 
-"Nationality bias", 
-"Disability bias", 
+"Age discrimination",
+"Nationality bias",
+"Disability bias",
 "Appearance bias",
-"Bias based on socioeconomic status",
+"Socioeconomic status bias",
 "Invalid response structure"
 ]
 
@@ -191,6 +191,21 @@ VALID_BIASES = [
     "Ungültige Antwortstruktur"
 ]
 
+LANGUAGE_RUN_ID_MATCHES = {
+    "de": [4, 5],
+    "English": [9],
+}
+
+def MATCHING_SET(lang: str):
+    """
+    Gibt die Liste der run_ids für die angegebene Sprache zurück.
+    Ist kein Eintrag vorhanden, kommt eine leere Liste.
+    """
+    return LANGUAGE_RUN_ID_MATCHES.get(lang, [])
+
+
+SELECTION_FILTER = "selected_for_annotation"
+
 
 from prepare_data import connect_to_mongo
 import re
@@ -202,12 +217,11 @@ from flask_pymongo import PyMongo
 app = Flask(__name__)
 
 
-
-def create_indexes_for_biases(run_ids=[4,5]):
+def create_indexes_for_biases(run_ids=[4,5], query_string = SELECTION_FILTER):
     collection = connect_to_mongo()
 
     # Filter mit Skip-Logik
-    query = {"selected_for_smaller_experiment": True}
+    query = {query_string: True}
 
     # stores all biases
     biases = []
@@ -306,10 +320,10 @@ def create_indexes_for_biases(run_ids=[4,5]):
     return biases
 
 
-def get_all_biases(run_ids=[4,5]):
+def get_all_biases(run_ids=[9], query_string=SELECTION_FILTER):
     collection = connect_to_mongo()
     pipeline = [
-        {"$match": {"selected_for_smaller_experiment": True}},
+        {"$match": {query_string: True}},
         {"$unwind": "$ollama_responses"},
         {"$match": {"ollama_responses.run_id": {"$in": run_ids}}},
         {"$project": {
@@ -339,10 +353,10 @@ def get_all_biases(run_ids=[4,5]):
 
     
 
-def get_bias_by_id(bias_id, run_ids=[4,5]):
+def get_bias_by_id(bias_id, run_ids=[9], query_string=SELECTION_FILTER):
     collection = connect_to_mongo()
     pipeline = [
-        {"$match": {"selected_for_smaller_experiment": True}},
+        {"$match": {query_string: True}},
         {"$unwind": "$ollama_responses"},
         {"$match": {"ollama_responses.run_id": {"$in": run_ids}}},
         {"$project": {
@@ -371,13 +385,21 @@ def get_bias_by_id(bias_id, run_ids=[4,5]):
     summary = doc.get("summary")
     datei = doc.get("HTML", {}).get("Datei") if isinstance(doc.get("HTML"), dict) else None
     bias_type = bias.get("bias_type_name")
-    
+    origin_url = bias.get("origin_url")
+
+    print(f"{bias_type=}")
+
+    bias_type_id = next(
+        idx for idx, v in enumerate(VALID_BIASES_ENGLISH)
+        if v.lower() == bias_type.lower()
+    )
+
     returned_bias = {
         "id": bias.get("id"),
         "summary": summary,
-        "origin_url": ("https://entscheidsuche.ch/docs/" + datei) if datei else "",
+        "origin_url": origin_url, # ("https://entscheidsuche.ch/docs/" + datei) if datei else "",
         "run_id": bias.get("run_id"),
-        "bias_type_id": VALID_BIASES.index(bias_type),
+        "bias_type_id": bias_type_id,
         "bias_type_name": bias_type,
         "textpassage": bias.get("textpassage"),
         "reasoning": bias.get("reasoning"),
@@ -415,7 +437,7 @@ def get_total_bias_count(run_ids=[4,5]):
     return count
 
 
-def update_annotation_in_db(bias_id, annotator, bias_type_id, comment):
+def update_annotation_in_db(bias_id, annotator, bias_type_id, comment, query_string=SELECTION_FILTER):
     collection = connect_to_mongo()
     bias_id = int(bias_id)
     bias_type_id = int(bias_type_id)
@@ -423,7 +445,7 @@ def update_annotation_in_db(bias_id, annotator, bias_type_id, comment):
     
     # Retrieve all documents once.
     docs = list(collection.find({
-        "selected_for_smaller_experiment": True,
+        query_string: True,
         "ollama_responses.response.biases.id": bias_id
     }))
 
@@ -467,11 +489,11 @@ def update_annotation_in_db(bias_id, annotator, bias_type_id, comment):
     if not updated:
         print(f"Bias with id {bias_id} not found in any document")
 
-def reload_indexes_for_biases():
+def reload_indexes_for_biases(query_string=SELECTION_FILTER):
     collection = connect_to_mongo()
     new_index = 1
 
-    for judgment in collection.find({"selected_for_smaller_experiment": True}):
+    for judgment in collection.find({query_string: True}):
         modified = False
         if "ollama_responses" in judgment and isinstance(judgment["ollama_responses"], list):
             for response in judgment["ollama_responses"]:
@@ -499,17 +521,17 @@ def index():
 
 # New route: Use both paths so /1 and /1/ work
 @app.route('/<int:bias_id>')
-def bias_route(bias_id, run_ids=[4,5]):
+def bias_route(bias_id, run_ids=[9]):
     # Parse run_ids from query parameters, e.g., ?run_ids=4,5 or ?run_ids=4
     run_ids_param = request.args.get('run_ids', None)
     if (run_ids_param):
         run_ids = [int(r.strip()) for r in run_ids_param.split(',') if r.strip().isdigit()]
     else:
-        run_ids = [4, 5]
+        run_ids = [9]
     selected_bias = get_bias_by_id(bias_id, run_ids=run_ids)
-    selected_bias["bias_type_name"] = VALID_BIASES[ int( selected_bias["bias_type_id"] ) ]
+    selected_bias["bias_type_name"] = VALID_BIASES_ENGLISH[ int( selected_bias["bias_type_id"] ) ]
     all_biases = get_all_biases(run_ids=run_ids)
-    return render_template('annotation.jinja2', bias=selected_bias, all_biases=all_biases, num_biases=len(all_biases), guidelines=GUIDELINES, bias_types=VALID_BIASES, run_ids=run_ids)
+    return render_template('annotation.jinja2', bias=selected_bias, all_biases=all_biases, num_biases=len(all_biases), guidelines=GUIDELINES_ENGLISH, bias_types=VALID_BIASES_ENGLISH, run_ids=run_ids)
 
 
 @app.route('/update_annotation', methods=['POST'])
@@ -517,7 +539,7 @@ def update_annotation():
     data = request.get_json()
     bias_type_id = data.get('bias_type_id')
     annotator = data.get('annotator')
-    bias_type = VALID_BIASES[int(bias_type_id)]
+    bias_type = VALID_BIASES_ENGLISH[int(bias_type_id)]
     comment = data.get('comment')
     bias_id = data.get('bias_id')
 
@@ -535,7 +557,7 @@ def filter_run_ids():
         run_ids = []
     # Ensure at least one run_id is selected – fallback to [4]
     if not run_ids:
-        run_ids = [4,5]
+        run_ids = [9]
     first_bias_with_run_id = get_all_biases(run_ids=run_ids)[0]
     return redirect(url_for('bias_route', bias_id=first_bias_with_run_id.get('id'), run_ids=",".join(map(str, run_ids))))
 
