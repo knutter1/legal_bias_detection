@@ -437,17 +437,21 @@ def get_total_bias_count(run_ids=[4,5]):
     return count
 
 
-def update_annotation_in_db(bias_id, annotator, bias_type_id, comment, query_string=SELECTION_FILTER):
+def update_annotation_in_db(bias_id, annotator, bias_type_id, comment, run_id, query_string=SELECTION_FILTER):
     collection = connect_to_mongo()
     bias_id = int(bias_id)
     bias_type_id = int(bias_type_id)
     current_time = time.time()
-    
+
     # Retrieve all documents once.
     docs = list(collection.find({
         query_string: True,
-        "ollama_responses.response.biases.id": bias_id
+        "ollama_responses.response.biases.id": bias_id,
+        "ollama_responses.response.biases.run_id" : 9
     }))
+
+    # print(f"{docs[0]=}")
+
 
     updated = False
     # Iterate through each document using nested loops
@@ -487,7 +491,9 @@ def update_annotation_in_db(bias_id, annotator, bias_type_id, comment, query_str
             collection.replace_one({"_id": doc["_id"]}, doc)
             break
     if not updated:
-        print(f"Bias with id {bias_id} not found in any document")
+        print(f"Bias with {bias_id=} {run_id=} {annotator=} not found in any document")
+
+        
 
 def reload_indexes_for_biases(query_string=SELECTION_FILTER):
     collection = connect_to_mongo()
@@ -542,9 +548,9 @@ def update_annotation():
     bias_type = VALID_BIASES_ENGLISH[int(bias_type_id)]
     comment = data.get('comment')
     bias_id = data.get('bias_id')
-
-    print(f"Updating annotation for bias {bias_id} by annotator {annotator} to bias type {bias_type_id} with comment {comment}")
-    update_annotation_in_db(bias_id, annotator, bias_type_id, comment)
+    run_id = data.get('run_id')[0]
+    print(f"Updating annotation for bias {bias_id} by annotator {annotator} to bias type {bias_type_id} with run_id {run_id} with comment {comment}")
+    update_annotation_in_db(bias_id=bias_id, annotator=annotator, bias_type_id=bias_type_id, comment=comment, run_id=run_id)
 
     return jsonify(success=True)
 
@@ -562,4 +568,5 @@ def filter_run_ids():
     return redirect(url_for('bias_route', bias_id=first_bias_with_run_id.get('id'), run_ids=",".join(map(str, run_ids))))
 
 if __name__ == '__main__':
+    # update_annotation_in_db(bias_id=1, annotator="Tom Herzberg", run_id=9, bias_type_id=3, comment="")
     app.run(debug=True)

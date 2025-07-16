@@ -246,6 +246,11 @@
         const bias = {{ bias | tojson }};
         const currentBiasId = bias.id;
 
+        const params = new URLSearchParams(window.location.search);
+        const runIdsParam = params.get('run_ids') || '';         // z.B. "4,5,6" oder "9"
+        const firstRunId   = runIdsParam.split(',')[0] || null;  // z.B. "4" oder "9"
+
+
         // Remove case list and navigation code
         // # ...existing code removed...
 
@@ -429,7 +434,8 @@
                     bias_type_id: selectedValue,
                     annotator: annotator,
                     comment: comment,
-                    bias_id: bias.id
+                    bias_id: bias.id,
+                    run_id: firstRunId
                 })
             })
             .then(response => response.json())
@@ -451,7 +457,8 @@
                     bias_type_id: 10,
                     annotator: annotator,
                     comment: comment,
-                    bias_id: bias.id
+                    bias_id: bias.id,
+                    run_id: firstRunId
                 })
             })
             .then(response => response.json())
@@ -596,7 +603,8 @@
                         bias_type_id: selectedValueForLog,
                         annotator: annotatorForLog,
                         comment: commentForLog,
-                        bias_id: biasIdForLog
+                        bias_id: biasIdForLog,
+                        run_id: firstRunId
                     });
 
                     // First save annotation
@@ -609,7 +617,8 @@
                             bias_type_id: selectedRadio.value,
                             annotator: document.getElementById('annotator-select').value,
                             comment: document.getElementById('annotation-comment').value,
-                            bias_id: bias.id
+                            bias_id: bias.id,
+                            run_id: firstRunId
                         })
                     })
                     .then(response => response.json())

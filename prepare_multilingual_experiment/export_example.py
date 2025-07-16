@@ -112,5 +112,5 @@ def get_element_with_id(id: int):
 if __name__ == "__main__":
     # Beispielaufruf: Speichere das 5. vietnamesische Urteil
     element_nummer = 20
-    # get_nth_judgment(n=element_nummer, language="Japanese")
-    get_element_with_id(id=630456)
+    # get_nth_judgment(n=element_nummer, language="Vietnamese")
+    get_element_with_id(id=627991)
