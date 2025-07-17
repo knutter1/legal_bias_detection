@@ -447,7 +447,7 @@ def update_annotation_in_db(bias_id, annotator, bias_type_id, comment, run_id, q
     docs = list(collection.find({
         query_string: True,
         "ollama_responses.response.biases.id": bias_id,
-        "ollama_responses.response.biases.run_id" : 9
+        "ollama_responses.response.biases.run_id" : run_id
     }))
 
     # print(f"{docs[0]=}")
@@ -534,6 +534,7 @@ def bias_route(bias_id, run_ids=[9]):
         run_ids = [int(r.strip()) for r in run_ids_param.split(',') if r.strip().isdigit()]
     else:
         run_ids = [9]
+    print(f"{run_ids=}")
     selected_bias = get_bias_by_id(bias_id, run_ids=run_ids)
     selected_bias["bias_type_name"] = VALID_BIASES_ENGLISH[ int( selected_bias["bias_type_id"] ) ]
     all_biases = get_all_biases(run_ids=run_ids)
