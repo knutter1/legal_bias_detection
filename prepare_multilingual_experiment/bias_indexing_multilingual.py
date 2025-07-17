@@ -82,6 +82,34 @@ LANGUAGE_RUN_ID_MATCHES = {
     "Japanese": [11],
 }
 
+#   –  [:：]  akzeptiert westliche und japanische Doppelpunkte.
+#   –  \s*    schluckt Leerzeichen/Tabulatoren.
+#   –  (?=\n{2,}...)  stoppt am nächsten Block oder am Dateiende.
+#   –  re.IGNORECASE nur bei Vietnamesisch, weil Groß-/Kleinschreibung variiert.
+
+PATTERNS = {
+    "English": re.compile(
+        r'Identified Bias[:：]\s*(.*?)\s*\n'
+        r'(?:Text Passage|Text passage)[:：]\s*(.*?)\s*\n'
+        r'(?:Justification|Reasoning)[:：]\s*(.*?)(?=\n{2,}(?:Identified Bias|検出されたバイアス|Thiên kiến)|\Z)',
+        re.DOTALL,
+    ),
+
+    "Japanese": re.compile(
+        r'検出されたバイアス[:：]\s*(.*?)\s*\n'
+        r'(?:テキスト|本文|抜粋)[:：]\s*(.*?)\s*\n'
+        r'(?:根拠|理由|正当化)[:：]\s*(.*?)(?=\n{2,}(?:検出されたバイアス|Identified Bias|Thiên kiến)|\Z)',
+        re.DOTALL,
+    ),
+
+    "Vietnamese": re.compile(
+        r'Thiên kiến(?: đã)? nhận dạng[:：]\s*(.*?)\s*\n'
+        r'(?:Đoạn văn bản|Trích dẫn)[:：]\s*(.*?)\s*\n'
+        r'(?:Lý do|Giải thích)[:：]\s*(.*?)(?=\n{2,}(?:Thiên kiến|Identified Bias|検出されたバイアス)|\Z)',
+        re.DOTALL | re.IGNORECASE,
+    ),
+}
+
 
 def MATCHING_SET(lang: str):
     """Welche run_ids sollen für eine Sprache ausgewertet werden?"""
@@ -125,7 +153,7 @@ def create_indexes_for_biases(language: str):
     run_ids = MATCHING_SET(language)
 
     print(f"run_ids for {language}: {run_ids}")
-    query = {"selected_for_annotation": True, "language": language}
+    query = {"selected_for_annotation": True, "language": language, "ollama_responses": {"$exists": True} }
     print(f"Anzahl der judgments: {collection.count_documents(query)}")
 
     biases: list[dict] = []
@@ -178,6 +206,11 @@ def create_indexes_for_biases(language: str):
                     content,
                     re.DOTALL,
                 )
+
+                if not bias_sections:
+                    print(f"⚠️  Keine parsbaren Bias-Blöcke in run {run_id} ({judgment['_id']})")
+                    print(content)
+                    continue
 
                 for raw_bias_type, textpassage, reasoning in bias_sections:
                     # Trim
@@ -233,5 +266,5 @@ def create_indexes_for_biases(language: str):
 # 6) Skript-Entry-Point
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # Beispiel: Vietnamesische Urteile parsen
-    _ = create_indexes_for_biases("Vietnamese")
+    # Beispiel: Urteile parsen
+    _ = create_indexes_for_biases("Japanese")

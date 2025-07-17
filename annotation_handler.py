@@ -527,15 +527,17 @@ def index():
 
 # New route: Use both paths so /1 and /1/ work
 @app.route('/<int:bias_id>')
-def bias_route(bias_id, run_ids=[9]):
+def bias_route(bias_id, run_ids=[9], not_found=False):
     # Parse run_ids from query parameters, e.g., ?run_ids=4,5 or ?run_ids=4
     run_ids_param = request.args.get('run_ids', None)
     if (run_ids_param):
         run_ids = [int(r.strip()) for r in run_ids_param.split(',') if r.strip().isdigit()]
     else:
-        run_ids = [9]
+        run_ids = run_ids
     print(f"{run_ids=}")
-    selected_bias = get_bias_by_id(bias_id, run_ids=run_ids)
+    selected_bias = get_bias_by_id(bias_id=bias_id, run_ids=run_ids)
+    if selected_bias is None and not not_found:
+        return bias_route(bias_id=1, run_ids=run_ids, not_found=True)
     selected_bias["bias_type_name"] = VALID_BIASES_ENGLISH[ int( selected_bias["bias_type_id"] ) ]
     all_biases = get_all_biases(run_ids=run_ids)
     return render_template('annotation.jinja2', bias=selected_bias, all_biases=all_biases, num_biases=len(all_biases), guidelines=GUIDELINES_ENGLISH, bias_types=VALID_BIASES_ENGLISH, run_ids=run_ids)
@@ -549,7 +551,7 @@ def update_annotation():
     bias_type = VALID_BIASES_ENGLISH[int(bias_type_id)]
     comment = data.get('comment')
     bias_id = data.get('bias_id')
-    run_id = data.get('run_id')[0]
+    run_id = int(data.get('run_id'))
     print(f"Updating annotation for bias {bias_id} by annotator {annotator} to bias type {bias_type_id} with run_id {run_id} with comment {comment}")
     update_annotation_in_db(bias_id=bias_id, annotator=annotator, bias_type_id=bias_type_id, comment=comment, run_id=run_id)
 
