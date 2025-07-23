@@ -92,8 +92,6 @@ def query_ollama(
         except (Timeout, ConnectionError, HTTPError,
                 ValueError, json.JSONDecodeError) as err:
 
-            if attempt == max_retries:
-                return f"Fehler nach {max_retries} Versuchen: {err}"
 
             wait = backoff_base ** (attempt - 1)   # 1 s, 2 s, 4 s, 8 s …
             print(f"[{model_name}] Versuch {attempt}/{max_retries} fehlgeschlagen "

@@ -153,7 +153,7 @@ def create_indexes_for_biases(language: str):
     run_ids = MATCHING_SET(language)
 
     print(f"run_ids for {language}: {run_ids}")
-    query = {"selected_for_annotation": True, "language": language, "ollama_responses": {"$exists": True} }
+    query = {"selected_for_annotation": True, "language": language, "ollama_responses": {"$exists": True}, "summary": {"$exists": True} }
     print(f"Anzahl der judgments: {collection.count_documents(query)}")
 
     biases: list[dict] = []

@@ -400,9 +400,9 @@ if __name__ == "__main__":
     #select_random_elements(sample_size)
 
     generate_summaries(model="llama3.3")
-    from check_bias import bias_check_single
-    bias_check_single(model="llama3.3", run_id=4)
-    bias_check_single(model="deepseek-r1:70b", run_id=5)
+    from check_bias import bias_checks
+    bias_checks(model="llama3.3", run_id=4)
+    bias_checks(model="deepseek-r1:70b", run_id=5)
     from annotation_handler import create_indexes_for_biases
     create_indexes_for_biases()
 

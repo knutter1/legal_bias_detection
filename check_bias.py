@@ -237,7 +237,7 @@ Wenn der Urteilstext mehrfach Biases beinhaltet, antwortest du mehrfach in diese
     }
 
 
-def bias_check_single(model, run_id):
+def bias_checks(model, run_id):
     """
     Hauptfunktion für die Biasüberprüfung.
     """
@@ -258,7 +258,7 @@ def bias_check_single(model, run_id):
     context_buckets = {ctx: [] for ctx in context_thresholds}
 
     for element in elements:
-        num_chars = (element["num_characters"] + 5000) // 3     # +1500, weil Promptgerüst ca. 1500 token
+        num_chars = (element["num_characters"] + 1500) // 3     # +1500, weil Promptgerüst ca. 1500 token
         for ctx in context_thresholds:
             if num_chars <= ctx:
                 context_buckets[ctx].append(element)
@@ -325,4 +325,4 @@ if __name__ == "__main__":
         ]
     )
 
-    bias_check_single(model="deepseek-r1:70b", run_id=RUN_ID)
+    bias_checks(model="deepseek-r1:70b", run_id=RUN_ID)
