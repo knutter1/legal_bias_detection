@@ -204,16 +204,27 @@ def MATCHING_SET(lang: str):
     return LANGUAGE_RUN_ID_MATCHES.get(lang, [])
 
 
+RUN_ID_TO_LANGUAGE = {
+    9: 'English',
+    10: 'Vietnamese',
+    11: 'Japanese',
+    12: 'Korean',
+    4: 'de',
+    5: 'de',
+}
+
+
 SELECTION_FILTER = "selected_for_annotation"
 
 
-from prepare_data import connect_to_mongo
+import os
 import re
 import json
 import time
-
-from flask import Flask, render_template, jsonify, request, redirect, url_for  # added redirect and url_for
-from flask_pymongo import PyMongo
+from bson import ObjectId
+from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask import send_file
+from prepare_data import connect_to_mongo
 app = Flask(__name__)
 
 
@@ -578,6 +589,39 @@ def filter_run_ids():
         run_ids = [9]
     first_bias_with_run_id = get_all_biases(run_ids=run_ids)[0]
     return redirect(url_for('bias_route', bias_id=first_bias_with_run_id.get('id'), run_ids=",".join(map(str, run_ids))))
+
+# Neue Route zum Exportieren aller Dokumente einer Sprache
+@app.route('/export_language_data')
+def export_language_data():
+    run_ids_param = request.args.get('run_ids', None)
+    if not run_ids_param:
+        return "No run id provided", 400
+    try:
+        first_run_id = int(run_ids_param.split(',')[0])
+    except ValueError:
+        return "Invalid run id", 400
+    language = RUN_ID_TO_LANGUAGE.get(first_run_id)
+    if not language:
+        return "Language not found", 400
+
+    # Daten abrufen und exportieren
+    collection = connect_to_mongo()
+    docs = list(collection.find({
+        "selected_for_annotation": True,
+        "language": language
+    }))
+    for doc in docs:
+        if '_id' in doc and isinstance(doc['_id'], ObjectId):
+            doc['_id'] = str(doc['_id'])
+    output_dir = os.path.join(os.getcwd(), 'exports')
+    os.makedirs(output_dir, exist_ok=True)
+    file_name = f"{language}_annotations.json"
+    file_path = os.path.join(output_dir, file_name)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(docs, f, ensure_ascii=False, indent=4)
+    return send_file(file_path, as_attachment=True,
+                     download_name=file_name,
+                     mimetype='application/json')
 
 if __name__ == '__main__':
     # update_annotation_in_db(bias_id=1, annotator="Tom Herzberg", run_id=9, bias_type_id=3, comment="")

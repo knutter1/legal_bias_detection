@@ -124,22 +124,29 @@
 <body>
     <div class="container-fluid vh-100 d-flex flex-column p-0">
 
-        <div class="d-flex gap-3 p-3 border-bottom align-items-center">
+        <div class="d-flex gap-3 p-3 border-bottom align-items-center flex-nowrap">
             <div class="d-flex flex-column ms-3" style="font-size: 0.8rem;">
 
-            <div style="">
-              <select
-                id="run-select"
-                class="form-select"            <!-- gleiche Klasse wie annotator-select -->
-                style="width: 15%;"
-                title="Select run"
-              >
-                <option value="9">English</option>
-                <option value="10">Vietnamese</option>
-                <option value="11">Japanese</option>
-                <option value="12">Korean</option>
-              </select>
-            </div>
+                <div style="">
+                  <select
+                    id="run-select"
+                    class="form-select"            <!-- gleiche Klasse wie annotator-select -->
+                    style="width: 15%;"
+                    title="Select run"
+                  >
+                    <option value="9">English</option>
+                    <option value="10">Vietnamese</option>
+                    <option value="11">Japanese</option>
+                    <option value="12">Korean</option>
+                  </select>
+
+                    <!-- Neuer Export-Button -->
+                  <button id="export-button" class="btn btn-outline-secondary"
+                          title="Export all data for the selected language">
+                    Export
+                  </button>
+
+                </div>
 
             </div>
 
@@ -549,6 +556,52 @@
                 });
             });
         });
+
+
+
+          // Run-Dropdown: Seite neu laden bei Änderung
+          select.addEventListener('change', (e) => {
+            const selectedRun = e.target.value;
+            const newUrl = `${window.location.pathname}?run_ids=${selectedRun}`;
+            window.location.href = newUrl;
+          });
+
+          // Event-Handler für den Export-Button
+          (function() {
+            const exportBtn = document.getElementById('export-button');
+            if (!exportBtn) return;
+            exportBtn.addEventListener('click', function() {
+              const paramsExp = new URLSearchParams(window.location.search);
+              const runIdsParamExp = paramsExp.get('run_ids') || firstRunId;
+              const runIdToLang = {
+                '9': 'English',
+                '10': 'Vietnamese',
+                '11': 'Japanese',
+                '12': 'Korean',
+                '4': 'de',
+                '5': 'de'
+              };
+              const firstRun = (runIdsParamExp || '').toString().split(',')[0];
+              const langName = runIdToLang[firstRun] || 'export';
+              const fileName = `${langName}_annotations.json`;
+              fetch(`/export_language_data?run_ids=${runIdsParamExp}`)
+                .then(response => response.blob())
+                .then(blob => {
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = fileName;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                  console.error('Export failed:', error);
+                  alert('Failed to export data. Please try again.');
+                });
+            });
+          })();
 
 
         // Update navigation button click handlers to use the new function
