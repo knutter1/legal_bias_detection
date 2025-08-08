@@ -34,6 +34,7 @@ def get_nth_judgment(n: int, language):
         # Finde das n-te Dokument, indem n-1 Dokumente übersprungen werden
         # `.find()` gibt einen Cursor zurück, `.next()` holt das erste (und einzige) Element
         cursor = collection.find({"language": language, "selected_for_annotation": True}).skip(n - 1).limit(1)
+        cursor = collection.find({"language": language, "selected_for_annotation": True, "ollama_responses.response.biases": {"exists": True}}).skip(n - 1).limit(1)
         document = next(cursor, None)  # Gibt 'None' zurück, wenn der Cursor leer ist
 
         if not document:
@@ -109,8 +110,54 @@ def get_element_with_id(id: int):
         print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
 
 
+def export_selected_annotations(language: str, output_dir: str = "full_exports"):
+    """
+    Exportiert alle Dokumente aus der MongoDB mit selected_for_annotation=True
+    und der angegebenen Sprache als eine JSON-Datei.
+    """
+    # 1. Eingabe validieren
+    if not isinstance(language, str) or not language:
+        print("Fehler: Bitte geben Sie eine gültige Sprache als String an.")
+        return
+
+    # 2. Ordner prüfen und ggf. erstellen
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+    except OSError as e:
+        print(f"Fehler beim Erstellen des Verzeichnisses '{output_dir}': {e}")
+        return
+
+    # 3. Datenbankabfrage
+    try:
+        collection = connect_to_mongo()
+        cursor = collection.find({
+            "selected_for_annotation": True,
+            "language": language
+        })
+        docs = list(cursor)
+
+        if not docs:
+            print(f"Keine Dokumente mit selected_for_annotation=True und language='{language}' gefunden.")
+            return
+
+        # 4. ObjectId in String umwandeln
+        for doc in docs:
+            if '_id' in doc and isinstance(doc['_id'], ObjectId):
+                doc['_id'] = str(doc['_id'])
+
+        # 5. JSON-Datei schreiben
+        file_name = f"{language}_annotations.json"
+        file_path = os.path.join(output_dir, file_name)
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(docs, f, ensure_ascii=False, indent=4)
+
+        print(f"✅ Erfolg! {len(docs)} Dokumente gespeichert in '{file_path}'.")
+    except Exception as e:
+        print(f"Ein unerwarteter Fehler ist aufgetreten: {e}")
+
+
 if __name__ == "__main__":
-    # Beispielaufruf: Speichere das 5. vietnamesische Urteil
-    element_nummer = 20
-    # get_nth_judgment(n=element_nummer, language="Vietnamese")
-    get_element_with_id(id=627991)
+    # get_element_with_id(id=631786)
+    # get_nth_judgment(10, "Korean")
+    export_selected_annotations(language="Korean")
+

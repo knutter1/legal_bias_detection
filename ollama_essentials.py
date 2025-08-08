@@ -56,6 +56,7 @@ def query_ollama(
         num_ctx: int = 65_536,
         max_retries: int = 5,
         backoff_base: int = 2,
+        temperature: float = 0,
 ):
     """
     Fragt die Ollama-API bis zu `max_retries`-mal ab.
@@ -67,7 +68,7 @@ def query_ollama(
         "prompt": prompt,
         "stream": False,
         "options": {
-            "temperature": 0,
+            "temperature": temperature,
             "seed": 0,
             "num_ctx": num_ctx,
             "max_tokens": 2048,

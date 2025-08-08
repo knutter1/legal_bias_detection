@@ -536,8 +536,17 @@ def bias_route(bias_id, run_ids=[9], not_found=False):
         run_ids = run_ids
     print(f"{run_ids=}")
     selected_bias = get_bias_by_id(bias_id=bias_id, run_ids=run_ids)
+
+    """raw = selected_bias.get("bias_type_name", "")
+    selected_bias["bias_type_name"] = next(
+        (v for v in VALID_BIASES_ENGLISH if v.lower() == raw.lower()),
+        raw  # Fallback: Originalwert, falls nichts passt
+    )"""
+
     if selected_bias is None and not not_found:
         return bias_route(bias_id=1, run_ids=run_ids, not_found=True)
+
+
     selected_bias["bias_type_name"] = VALID_BIASES_ENGLISH[ int( selected_bias["bias_type_id"] ) ]
     all_biases = get_all_biases(run_ids=run_ids)
     return render_template('annotation.jinja2', bias=selected_bias, all_biases=all_biases, num_biases=len(all_biases), guidelines=GUIDELINES_ENGLISH, bias_types=VALID_BIASES_ENGLISH, run_ids=run_ids)

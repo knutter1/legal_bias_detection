@@ -44,6 +44,7 @@ PROMPT_FILES: dict[str, Path | None] = {
     "German":       None,  # Prompt ist inline‑Konstante (s.u.)
     "Vietnamese":   Path("prepare_multilingual_experiment/prompt_summary_vietnamese.txt"),
     "Japanese":     Path("prepare_multilingual_experiment/prompt_summary_japanese.txt"),
+    "Korean":       Path("prepare_multilingual_experiment/prompt_summary_korean.txt")
 }
 
 # Deutscher Prompt direkt im Code
@@ -172,12 +173,8 @@ if __name__ == "__main__":
         handlers=[logging.StreamHandler()],
     )
 
-    # Nur Vietnamesisch & Japanisch, wie gewünscht
     generate_summaries_for_language(
-        "Vietnamese",
+        "Korean",
         model="llama3.1",                # anpassen, falls anderes Modell
     )
-    generate_summaries_for_language(
-        "Japanese",
-        model="llama3.1",
-    )
+

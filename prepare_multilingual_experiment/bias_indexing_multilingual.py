@@ -15,6 +15,7 @@ import unicodedata
 import re
 import time
 from typing import List, Dict
+from bias_indexing_AI_classifier import classify_bias_type
 
 # ---------------------------------------------------------------------------
 # 1) Kanonische (englische) Bias-Liste  – Reihenfolge definiert die ID
@@ -69,6 +70,19 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         _nfc_lc("社会経済的地位バイアス"): "socioeconomic status bias",
         _nfc_lc("無効な応答構造"): "invalid response structure",
     },
+    "Korean": {
+        _nfc_lc("편향 없음"): "no bias",
+        _nfc_lc("성별 편향"): "gender bias",
+        _nfc_lc("종교적 편향"): "religious bias",
+        _nfc_lc("인종적 편향"): "racial bias",
+        _nfc_lc("성적 지향 편향"): "sexual orientation bias",
+        _nfc_lc("연령 차별"): "age discrimination",
+        _nfc_lc("국적 편향"): "nationality bias",
+        _nfc_lc("장애 편향"): "disability bias",
+        _nfc_lc("외모 편향"): "appearance bias",
+        _nfc_lc("사회경제적 지위 편향"): "socioeconomic status bias",
+        _nfc_lc("잘못된 응답 구조"): "invalid response structure",
+    },
     # deutsch oder weitere Sprachen können hier ergänzt werden
 }
 
@@ -80,6 +94,7 @@ LANGUAGE_RUN_ID_MATCHES = {
     "English": [9],
     "Vietnamese": [10],
     "Japanese": [11],
+    "Korean": [12],
 }
 
 #   –  [:：]  akzeptiert westliche und japanische Doppelpunkte.
@@ -107,6 +122,13 @@ PATTERNS = {
         r'(?:Đoạn văn bản|Trích dẫn)[:：]\s*(.*?)\s*\n'
         r'(?:Lý do|Giải thích)[:：]\s*(.*?)(?=\n{2,}(?:Thiên kiến|Identified Bias|検出されたバイアス)|\Z)',
         re.DOTALL | re.IGNORECASE,
+    ),
+    "Korean": re.compile(
+        r'검출된 편향[:：]\s*(.*?)\s*\n'  # Identified Bias
+        r'(?:본문|텍스트)[:：]\s*(.*?)\s*\n'  # Text Passage
+        r'(?:근거|이유|정당화)[:：]\s*(.*?)(?=\n{2,}'  # Justification
+        r'(?:검출된 편향|Identified Bias|検出されたバイアス|Thiên kiến)|\Z)',
+        re.DOTALL,
     ),
 }
 
@@ -143,7 +165,6 @@ def to_canonical(language: str, bias_str: str) -> str | None:
 # ---------------------------------------------------------------------------
 TEST_ONLY = True   # Flag für Trockenlauf
 
-
 def create_indexes_for_biases(language: str):
     """
     Lies die Urteile der angegebenen Sprache aus Mongo, parse Bias-Blöcke
@@ -176,14 +197,25 @@ def create_indexes_for_biases(language: str):
                 # Prompt-Gedanken abschneiden
                 content = content.split("</think>")[-1].lstrip()
 
+                """
                 # schneller Exit, falls explizit „No bias“ / Äquivalent
-                if normalize(content) in {
+                no_bias_multilingual = {
                     _nfc_lc("No bias"),
                     _nfc_lc("Không có thiên kiến"),
                     _nfc_lc("バイアスなし"),
-                }:
-                    continue
+                    _nfc_lc("「편향 없음」"),
+                }
 
+                # Inhalt normalisieren
+                norm_content = normalize(content)
+
+                # prüfen auf exakte Übereinstimmung oder ob eine der Varianten als Substring vorkommt
+                if (
+                        norm_content in no_bias_multilingual
+                        or any(variant in norm_content for variant in no_bias_multilingual)
+                ):
+                    continue
+"""
                 # --------------------------------------------------------
                 # Im DB-Speicherformat Original- & Parsed-Version trennen
                 # --------------------------------------------------------
@@ -208,25 +240,23 @@ def create_indexes_for_biases(language: str):
                 )
 
                 if not bias_sections:
-                    print(f"⚠️  Keine parsbaren Bias-Blöcke in run {run_id} ({judgment['_id']})")
-                    print(content)
+                    # print(f"⚠️  Keine parsbaren Bias-Blöcke in run {run_id} ({judgment['_id']})")
+                    # print(content)
                     continue
 
                 for raw_bias_type, textpassage, reasoning in bias_sections:
                     # Trim
                     bias_type = raw_bias_type.strip()
+                    bias_type = classify_bias_type(bias_type)
+                    if bias_type == "":
+                        continue
+
                     textpassage = textpassage.strip()
                     reasoning = reasoning.strip()
 
-                    canonical = to_canonical(language, bias_type)
-                    if canonical is None:
-                        print(f"⚠️  »{bias_type}« is not a valid bias type")
-                        continue
-
-                    canon_norm = normalize(canonical)
 
                     # Duplikat-Check (kanonisch!)
-                    key = (canon_norm, textpassage)
+                    key = (bias_type, textpassage)
                     if key in seen:
                         continue
                     seen.add(key)
@@ -236,8 +266,8 @@ def create_indexes_for_biases(language: str):
                         "summary": judgment.get("summary"),
                         "origin_url": judgment.get("origin_url"),
                         "run_id": run_id,
-                        "bias_type_id": CANONICAL_BIASES.index(canonical),
-                        "bias_type_name": canonical,   # englische Kurzform
+                        "bias_type_id": CANONICAL_BIASES.index(bias_type),
+                        "bias_type_name": bias_type,   # englische Kurzform
                         "textpassage": textpassage,
                         "reasoning": reasoning,
                         "annotations": [],
@@ -255,10 +285,11 @@ def create_indexes_for_biases(language: str):
                     biases.append(bias_dict)
 
                     # --- Debug-Ausgabe -----------------------------------
-                    print(f"[{bias_dict['id']}] {bias_dict['bias_type_name']}")
+                    print(f"[{bias_dict['id']}] {judgment["id"]} {bias_dict['bias_type_name']}")
                     print(textpassage)
                     print(reasoning + "\n")
 
+    print(f"{len(biases)}")
     return biases
 
 
@@ -267,4 +298,4 @@ def create_indexes_for_biases(language: str):
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     # Beispiel: Urteile parsen
-    _ = create_indexes_for_biases("Japanese")
+    _ = create_indexes_for_biases("Korean")

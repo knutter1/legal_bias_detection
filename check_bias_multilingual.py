@@ -660,6 +660,93 @@ def bias_check_single_en(model, run_id):
         print(f"Verarbeitung für Kontextgröße {ctx} abgeschlossen.")
 
 
+def get_model_response_kr(text, model, run_id, gpu_nr: int = 0, num_ctx: int = 8192):
+    """Run the Korean bias‑detection prompt through the LLM and return the payload."""
+
+    try:
+        with open("prepare_multilingual_experiment/prompt_bias_detection_korean.txt", "r", encoding="utf-8") as f:
+            prompt_template = f.read()
+    except FileNotFoundError:
+        logging.error("Korean prompt file 'prompt_bias_detection_korean.txt' not found.")
+        return []
+
+    prompt_text = prompt_template.replace("{text}", text)
+
+    start_time = time.time()
+    try:
+        response = query_ollama(model, prompt_text, gpu_nr=gpu_nr, num_ctx=num_ctx)
+    except Exception as e:
+        logging.error(f"Fehler bei der Modellabfrage: {e}")
+        return []
+
+    elapsed_time = round(time.time() - start_time, 2)
+
+    return {
+        "id": str(uuid.uuid4()),
+        "model": model,
+        "response": response,
+        "time_taken": elapsed_time,
+        "timestamp": time.time(),
+        "run_id": run_id,
+    }
+
+
+def bias_check_single_kr(model: str, run_id: int):
+    """Process all Korean judgments and push LLM responses back to MongoDB."""
+
+    collection = connect_to_mongo()
+
+    query = {"language": "Korean"}
+    if SKIP_PROCESSED:
+        query["ollama_responses.run_id"] = {"$ne": run_id}
+
+    elements = list(collection.find(query))
+    elements.sort(key=lambda x: len(x["full_text"]))
+
+    context_thresholds = [8192, 16384, 32768, 65536, 131072]
+    context_buckets = {ctx: [] for ctx in context_thresholds}
+
+    for element in elements:
+        num_chars = (len(element["full_text"]) + 5000) // 1  # Heuristik wie bei VN
+        for ctx in context_thresholds:
+            if num_chars <= ctx:
+                context_buckets[ctx].append(element)
+                break
+
+    for ctx, bucket in context_buckets.items():
+        print(f"Kontextgröße {ctx}: {len(bucket)} Elemente")
+
+    for ctx, bucket in context_buckets.items():
+        print(f"Beginne Verarbeitung für Kontextgröße {ctx} mit {len(bucket)} Elementen.")
+        shuffle(bucket)
+        for element in bucket:
+            text = element["full_text"]
+            processed_count = collection.count_documents({"ollama_responses.run_id": run_id, "language": "Korean"})
+
+            if RELOAD_MODEL_IF_MEMORY_FULL and processed_count % 10 == 0 and is_gpu_memory_overloaded(threshold=.9):
+                _ctx = 131072
+                print("Lade model neu, weil GPU-Speicher voll ist")
+            else:
+                _ctx = ctx
+
+            start_time = time.time()
+            response_obj = get_model_response_kr(text=text, model=model, run_id=run_id, num_ctx=_ctx)
+            end_time = time.time()
+
+            if TEST_ONLY:
+                print(f"[TEST] Response for element {element.get('id', element.get('_id'))}: {response_obj}")
+            else:
+                collection.update_one(
+                    {"_id": element["_id"]},
+                    {"$push": {"ollama_responses": {"$each": [response_obj]}}},
+                )
+
+            print(
+                f"{datetime.now().strftime('%H:%M:%S')} - Verarbeitete Korean‑Elemente für Run {run_id}: {processed_count} in {round(end_time - start_time, 2)}s"
+            )
+        print(f"Verarbeitung für Kontextgröße {ctx} abgeschlossen.")
+
+
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
@@ -670,4 +757,4 @@ if __name__ == "__main__":
         ]
     )
 
-    bias_check_single_jp(model="deepseek-r1:70b", run_id=11)
+    bias_check_single_kr(model="deepseek-r1:70b", run_id=12)
